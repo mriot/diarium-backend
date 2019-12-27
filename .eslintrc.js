@@ -17,7 +17,7 @@ module.exports = {
     "rules": {
       quotes: ["warn", "double"],
       "no-tabs": ["error", { allowIndentationTabs: true }],
-      "object-curly-newline": ["error", { "multiline": true }],
+      "object-curly-newline": ["off"],
       "template-tag-spacing": ["error", "always"],
       "arrow-parens": ["error", "as-needed"],
       "indent": ["error", "tab"],
