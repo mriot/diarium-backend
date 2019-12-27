@@ -29,5 +29,8 @@ module.exports = {
       "comma-dangle": ["off"],
       "spaced-comment": ["off"],
       "no-console": ["off"],
+      "no-unused-vars": ["warn"],
+      "space-unary-ops": ["off"],
+      "import/newline-after-import": ["off"],
     }
 };
