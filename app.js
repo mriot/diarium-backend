@@ -1,32 +1,17 @@
 console.clear();
-
 const express = require("express");
-const Sequelize = require("sequelize");
-const entries = require("./models/entries");
+const db = require("./config/database");
 
 const port = process.env.PORT || 5000;
-
 const app = express();
-const sequelize = new Sequelize({
-	dialect: "sqlite",
-	storage: "db.sqlite"
-});
 
-sequelize
-	.authenticate()
-	.then(() => {
-		console.log("Connection has been established successfully!");
-	})
-	.catch(err => {
-		console.error("Unable to connect to the database:", err);
-	});
-
-entries(sequelize, Sequelize);
-sequelize.sync();
+// Test database connection
+db.authenticate()
+	.then(console.log("Connection to the database has been established successfully!"))
+	.catch(err => console.error("Unable to connect to the database:", err));
 
 // Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use("/api/entries", require("./routes/entries"));

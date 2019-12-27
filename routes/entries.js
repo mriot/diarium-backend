@@ -1,4 +1,6 @@
 const express = require("express");
+const db = require("../config/database");
+const Entries = require("../models/entries");
 const router = express.Router();
 
 const myData = {

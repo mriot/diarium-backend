@@ -1,20 +1,29 @@
-module.exports = (sequelize, DataTypes) => {
-	const model = sequelize.define("entry", {
-		id: {
-			type: DataTypes.INTEGER,
-			primaryKey: true,
-			autoIncrement: true,
-		},
-		picturename: {
-			type: DataTypes.STRING,
-			unique: true,
-		},
-		name: {
-			type: DataTypes.STRING,
-			unique: true,
-		},
-		manufacturedin: { type: DataTypes.INTEGER, }
-	});
+const Sequelize = require("sequelize");
+const db = require("../config/database");
 
-	return model;
-};
+const Entry = db.define("entry", {
+	id: {
+		type: Sequelize.INTEGER,
+		primaryKey: true,
+		autoIncrement: true,
+	},
+	createdAt: {
+		type: Sequelize.DATE,
+	},
+	modifiedAt: {
+		type: Sequelize.DATE,
+	},
+	content: {
+		type: Sequelize.TEXT,
+	},
+	contentType: {
+		type: Sequelize.TEXT,
+	},
+	tags: {
+		type: Sequelize.STRING,
+	},
+});
+
+Entry.sync({ force: false });
+
+module.exports = Entry;
