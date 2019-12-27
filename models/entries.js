@@ -10,20 +10,21 @@ const Entry = db.define("entry", {
 	createdAt: {
 		type: Sequelize.DATE,
 	},
-	modifiedAt: {
+	updatedAt: {
 		type: Sequelize.DATE,
 	},
 	content: {
 		type: Sequelize.TEXT,
 	},
 	contentType: {
-		type: Sequelize.TEXT,
+		type: Sequelize.STRING,
 	},
 	tags: {
 		type: Sequelize.STRING,
 	},
 });
 
+// create table (force will drop existing table first)
 Entry.sync({ force: false });
 
 module.exports = Entry;
