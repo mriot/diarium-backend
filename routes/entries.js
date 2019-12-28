@@ -1,5 +1,7 @@
 const express = require("express");
 const Op = require("sequelize/lib/operators");
+const moment = require("moment");
+const sequelize = require("sequelize");
 const Entries = require("../models/entries");
 const router = express.Router();
 
@@ -24,13 +26,15 @@ router.get("/", (req, res) => {
 router.get("/:year", (req, res) => {
 	Entries.findAll({
 		where: {
-			year: req.params.year
-		}
+			createdAt: {
+				[Op.like]: `%${moment(req.params.year, "YYYY").get("year")}%`
+			}
+		},
 	})
 		.then(entries => res.send(entries))
 		.catch(error => console.log(error));
 });
-
+/*
 // ALL ENTRIES FOR GIVEN YEAR:MONTH PAIR
 router.get("/:year/:month", (req, res) => {
 	Entries.findAll({
@@ -52,5 +56,5 @@ router.get("/:year/:month/:day", (req, res) => {
 		.then(entry => res.send(entry))
 		.catch(error => console.log(error));
 });
-
+*/
 module.exports = router;
