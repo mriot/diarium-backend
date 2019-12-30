@@ -1,7 +1,7 @@
 const express = require("express");
 const Op = require("sequelize/lib/operators");
 const moment = require("moment");
-const sequelize = require("sequelize");
+const Sequelize = require("sequelize");
 const Entries = require("../models/entries");
 const router = express.Router();
 
@@ -23,12 +23,40 @@ router.get("/", (req, res) => {
 });
 
 // ALL ENTRIES FOR GIVEN YEAR
+/*
 router.get("/:year", (req, res) => {
 	Entries.findAll({
 		where: {
 			createdAt: {
 				[Op.like]: `%${moment(req.params.year, "YYYY").get("year")}%`
 			}
+		},
+	})
+		.then(entries => res.send(entries))
+		.catch(error => console.log(error));
+});
+*/
+
+router.get("/:year", (req, res) => {
+	if (!/^\d{4}$/.test(req.params.year)) {
+		res.send("Year has to be a valid 4 digit number");
+		return;
+	}
+
+	Entries.findAll({
+		where: {
+			[Sequelize.Op.and]: [
+				{
+					createdAt: {
+						[Sequelize.Op.gte]: moment(req.params.year, "YYYY").utcOffset(0, true)
+					}
+				},
+				{
+					createdAt: {
+						[Sequelize.Op.lt]: moment(req.params.year, "YYYY").add(1, "year").utcOffset(0, true)
+					}
+				}
+			]
 		},
 	})
 		.then(entries => res.send(entries))
