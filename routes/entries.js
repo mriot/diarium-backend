@@ -13,7 +13,7 @@ router.get("/", (req, res) => {
 				id: req.query.id
 			}
 		})
-			.then(entry => res.send(entry))
+			.then(entry => (entry !== null ? res.send(entry) : res.sendStatus(404)))
 			.catch(error => console.log(error));
 	} else {
 		Entries.findAll()
@@ -26,8 +26,7 @@ router.get("/", (req, res) => {
 // ALL ENTRIES FOR GIVEN YEAR
 router.get("/:year", (req, res) => {
 	if (!/^\d{4}$/.test(req.params.year)) {
-		// TODO: useful response
-		res.send("Year has to be a valid 4 digit number");
+		res.status(400).json({ error: "Year has to be a valid 4 digit number" });
 		return;
 	}
 
@@ -181,5 +180,23 @@ router.put("/", (req, res) => {
 		});
 });
 
+
+// DELETE SINGLE ENTRY
+router.delete("/", (req, res) => {
+	if (!req.query.id) res.status(400).json({ error: "No ID specified" });
+	Entries.findOne({
+		where: {
+			id: req.query.id
+		}
+	})
+		.then(existingEntry => {
+			if (!existingEntry) {
+				res.status(404).json({ error: `Entry for ID ${req.query.id} not found` });
+				return;
+			}
+
+			existingEntry.destroy().then(deletedEntry => res.send(deletedEntry));
+		});
+});
 
 module.exports = router;
