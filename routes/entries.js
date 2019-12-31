@@ -146,4 +146,50 @@ router.post("/:year/:month/:day", (req, res) => {
 });
 
 
+// UPDATE SINGLE ENTRY
+router.put("/:year/:month/:day", (req, res) => {
+	const assignedDay = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
+
+	// strictly check if date matches our format
+	if (!assignedDay.isValid()) {
+		res.status(400).json({ error: `${assignedDay}` });
+		return;
+	}
+
+	// check if an entry exists for that day
+	Entries.findOne({
+		where: {
+			assignedDay: {
+				[Sequelize.Op.eq]: assignedDay
+			}
+		},
+	})
+		.then(existingEntry => {
+			if (!existingEntry) {
+				res.status(404).json({ error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} not found` });
+				return;
+			}
+
+			const schema = Joi.object({
+				content: Joi.string().required(),
+				tags: Joi.string(),
+				contentType: Joi.string().optional(),
+			});
+		
+			const { error, value } = schema.validate(req.body);
+		
+			if (error) {
+				res.status(400).json({ error });
+				return;
+			}
+
+			existingEntry.update({
+				content: req.body.content,
+				tags: req.body.tags,
+				contentType: req.body.contentType,
+			}).then(updatedEntry => res.send(updatedEntry));
+		});
+});
+
+
 module.exports = router;
