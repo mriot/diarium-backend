@@ -5,6 +5,10 @@ const Joi = require("@hapi/joi");
 const Entries = require("../models/entries");
 const router = express.Router();
 
+/**
+ * =============== [ GET - REQUESTS] ===============
+ */
+
 // GET ALL ENTRIES OR ONE BY ID
 router.get("/", (req, res) => {
 	if (req.query.id) {
@@ -25,8 +29,10 @@ router.get("/", (req, res) => {
 
 // ALL ENTRIES FOR GIVEN YEAR
 router.get("/:year", (req, res) => {
-	if (!/^\d{4}$/.test(req.params.year)) {
-		res.status(400).json({ error: "Year has to be a valid 4 digit number" });
+	const parsedDate = moment(req.params.year, "YYYY", true);
+
+	if (!parsedDate.isValid()) {
+		res.status(400).json({ error: `${parsedDate}` });
 		return;
 	}
 
@@ -34,13 +40,13 @@ router.get("/:year", (req, res) => {
 		where: {
 			[Sequelize.Op.and]: [
 				{
-					createdAt: {
-						[Sequelize.Op.gte]: moment(req.params.year, "YYYY").utcOffset(0, true)
+					assignedDay: {
+						[Sequelize.Op.gte]: moment(req.params.year, "YYYY")
 					}
 				},
 				{
-					createdAt: {
-						[Sequelize.Op.lt]: moment(req.params.year, "YYYY").add(1, "year").utcOffset(0, true)
+					assignedDay: {
+						[Sequelize.Op.lt]: moment(req.params.year, "YYYY").add(1, "year")
 					}
 				}
 			]
@@ -53,17 +59,24 @@ router.get("/:year", (req, res) => {
 
 // ALL ENTRIES FOR GIVEN YEAR:MONTH PAIR
 router.get("/:year/:month", (req, res) => {
+	const parsedDate = moment(`${req.params.year}-${req.params.month}`, "YYYY-MM", true);
+
+	if (!parsedDate.isValid()) {
+		res.status(400).json({ error: `${parsedDate}` });
+		return;
+	}
+
 	Entries.findAll({
 		where: {
 			[Sequelize.Op.and]: [
 				{
-					createdAt: {
-						[Sequelize.Op.gte]: moment(`${req.params.year}-${req.params.month}`, "YYYY-MM").utcOffset(0, true)
+					assignedDay: {
+						[Sequelize.Op.gte]: parsedDate
 					}
 				},
 				{
-					createdAt: {
-						[Sequelize.Op.lt]: moment(`${req.params.year}-${req.params.month}`, "YYYY-MM").add(1, "month").utcOffset(0, true)
+					assignedDay: {
+						[Sequelize.Op.lt]: parsedDate.add(1, "month")
 					}
 				}
 			]
@@ -76,26 +89,26 @@ router.get("/:year/:month", (req, res) => {
 
 // SINGLE ENTRY (matching year/month/day)
 router.get("/:year/:month/:day", (req, res) => {
+	const parsedDate = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
+
+	if (!parsedDate.isValid()) {
+		res.status(400).json({ error: `${parsedDate}` });
+		return;
+	}
+
 	Entries.findOne({
 		where: {
-			[Sequelize.Op.and]: [
-				{
-					createdAt: {
-						[Sequelize.Op.gte]: moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD").utcOffset(0, true)
-					}
-				},
-				{
-					createdAt: {
-						[Sequelize.Op.lt]: moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD").add(1, "day").utcOffset(0, true)
-					}
-				}
-			]
+			assignedDay: parsedDate
 		},
 	})
-		.then(entry => (entry.length < 1 ? res.sendStatus(404) : res.send(entry)))
+		.then(entry => (entry !== null ? res.send(entry) : res.sendStatus(404)))
 		.catch(error => console.log(error));
 });
 
+
+/**
+ * =============== [ POST - REQUESTS] ===============
+ */
 
 // CREATE SINGLE ENTRY
 router.post("/:year/:month/:day", (req, res) => {
@@ -144,6 +157,10 @@ router.post("/:year/:month/:day", (req, res) => {
 		});
 });
 
+
+/**
+ * =============== [ PUT - REQUESTS] ===============
+ */
 
 // UPDATE SINGLE ENTRY
 router.put("/", (req, res) => {
