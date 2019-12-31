@@ -1,5 +1,4 @@
 const Sequelize = require("sequelize");
-const moment = require("moment");
 const db = require("../config/database");
 
 const Entry = db.define("entry", {
@@ -8,39 +7,28 @@ const Entry = db.define("entry", {
 		primaryKey: true,
 		autoIncrement: true,
 	},
-	createdAt: {
-		type: Sequelize.DATE,
-		// get: () => moment.utc(this.getDataValue("createdAt")).format("YYYY-MM-DD"),
-	},
-	updatedAt: {
-		type: Sequelize.DATE,
+	assignedDay: {
+		type: Sequelize.DATEONLY
 	},
 	content: {
 		type: Sequelize.TEXT,
 	},
 	contentType: {
 		type: Sequelize.STRING,
+		defaultValue: "text/markdown",
 	},
 	tags: {
 		type: Sequelize.STRING,
+	},
+	createdAt: {
+		type: Sequelize.DATE,
+	},
+	updatedAt: {
+		type: Sequelize.DATE,
 	},
 });
 
 // create table (force will drop existing table first)
 Entry.sync({ force: false });
-
-/* * /
-Entry.create({
-	content: "Hello! :)",
-	contentType: "markdown",
-	tags: "my tags",
-	createdAt: moment()
-});
-/* */
-
-// Entry.create({ content: "Hello2 :)", contentType: "markdown", tags: "my tags" });
-// Entry.create({ content: "Hello3 :)", contentType: "markdown", tags: "my tags" });
-// Entry.create({ content: "Hello4 :)", contentType: "markdown", tags: "my tags" });
-// Entry.create({ content: "Hello5 :)", contentType: "markdown", tags: "my tags" });
 
 module.exports = Entry;
