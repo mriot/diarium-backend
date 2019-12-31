@@ -147,26 +147,16 @@ router.post("/:year/:month/:day", (req, res) => {
 
 
 // UPDATE SINGLE ENTRY
-router.put("/:year/:month/:day", (req, res) => {
-	const assignedDay = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
-
-	// strictly check if date matches our format
-	if (!assignedDay.isValid()) {
-		res.status(400).json({ error: `${assignedDay}` });
-		return;
-	}
-
-	// check if an entry exists for that day
+router.put("/", (req, res) => {
+	if (!req.query.id) res.status(400).json({ error: "No ID specified" });
 	Entries.findOne({
 		where: {
-			assignedDay: {
-				[Sequelize.Op.eq]: assignedDay
-			}
-		},
+			id: req.query.id
+		}
 	})
 		.then(existingEntry => {
 			if (!existingEntry) {
-				res.status(404).json({ error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} not found` });
+				res.status(404).json({ error: `Entry for ID ${req.query.id} not found` });
 				return;
 			}
 
