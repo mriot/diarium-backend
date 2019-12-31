@@ -1,6 +1,7 @@
 const express = require("express");
 const moment = require("moment");
 const Sequelize = require("sequelize");
+const Joi = require("@hapi/joi");
 const Entries = require("../models/entries");
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get("/", (req, res) => {
 			.catch(error => console.log(error));
 	} else {
 		Entries.findAll()
-			.then(entries => (entries.length < 1 ? res.send(404) : res.send(entries)))
+			.then(entries => (entries.length < 1 ? res.sendStatus(404) : res.send(entries)))
 			.catch(error => console.log(error));
 	}
 });
@@ -46,7 +47,7 @@ router.get("/:year", (req, res) => {
 			]
 		},
 	})
-		.then(entries => (entries.length < 1 ? res.send(404) : res.send(entries)))
+		.then(entries => (entries.length < 1 ? res.sendStatus(404) : res.send(entries)))
 		.catch(error => console.log(error));
 });
 
@@ -69,7 +70,7 @@ router.get("/:year/:month", (req, res) => {
 			]
 		},
 	})
-		.then(entries => (entries.length < 1 ? res.send(404) : res.send(entries)))
+		.then(entries => (entries.length < 1 ? res.sendStatus(404) : res.send(entries)))
 		.catch(error => console.log(error));
 });
 
@@ -92,8 +93,57 @@ router.get("/:year/:month/:day", (req, res) => {
 			]
 		},
 	})
-		.then(entry => (entry.length < 1 ? res.send(404) : res.send(entry)))
+		.then(entry => (entry.length < 1 ? res.sendStatus(404) : res.send(entry)))
 		.catch(error => console.log(error));
 });
+
+
+// CREATE SINGLE ENTRY
+router.post("/:year/:month/:day", (req, res) => {
+	const assignedDay = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
+
+	// strictly check if date matches our format
+	if (!assignedDay.isValid()) {
+		res.status(400).json({ error: `${assignedDay}` });
+		return;
+	}
+
+	// check if an entry already exists for that day
+	Entries.findOne({
+		where: {
+			assignedDay: {
+				[Sequelize.Op.eq]: assignedDay
+			}
+		},
+	})
+		.then(existingEntry => {
+			if (existingEntry) {
+				res.status(409).json({ error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists` });
+				return;
+			}
+
+			const schema = Joi.object({
+				content: Joi.string().required(),
+				tags: Joi.string(),
+				contentType: Joi.string().optional(),
+			});
+		
+			const { error, value } = schema.validate(req.body);
+		
+			if (error) {
+				res.status(400).json({ error });
+				return;
+			}
+		
+			Entries.create({
+				assignedDay, // derived from URL path
+				content: req.body.content,
+				tags: req.body.tags,
+				contentType: req.body.contentType, // default: text/markdown
+			})
+				.then(newEntry => res.json(newEntry));
+		});
+});
+
 
 module.exports = router;
