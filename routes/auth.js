@@ -33,7 +33,7 @@ router.post("/", (req, res) => {
 				return;
 			}
 
-			jwt.sign(user.dataValues.username, "mysecret", (err, token) => {
+			jwt.sign({ username: user.dataValues.username }, process.env.JWT_SECRET, { expiresIn: "1d" }, (err, token) => {
 				if (err) {
 					res.status(500).json({ error: "Some server sided error occured" });
 					return;
