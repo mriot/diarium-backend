@@ -2,16 +2,34 @@ const express = require("express");
 const moment = require("moment");
 const Sequelize = require("sequelize");
 const Joi = require("@hapi/joi");
+const jwt = require("jsonwebtoken");
 const Entries = require("../models/entries");
 
 const router = express.Router();
+
+const verifyJWT = (req, res, next) => {
+	const token = (req.headers.authorization && req.headers.authorization.split(" ")[1]) || false;
+
+	if (!token) {
+		res.sendStatus(401);
+		next();
+		return;
+	}
+
+	jwt.verify(token, "mysecret", (err, decoded) => {
+		if (err) {
+			res.status(401).json({ err });
+		}
+		next();
+	});
+};
 
 /**
  * =============== [ GET - REQUESTS] ===============
  */
 
 // GET ALL ENTRIES OR ONE BY ID
-router.get("/", (req, res) => {
+router.get("/", verifyJWT, (req, res) => {
 	if (req.query.id) {
 		Entries.findOne({
 			where: {
@@ -29,7 +47,7 @@ router.get("/", (req, res) => {
 
 
 // ALL ENTRIES FOR GIVEN YEAR
-router.get("/:year", (req, res) => {
+router.get("/:year", verifyJWT, (req, res) => {
 	const parsedDate = moment(req.params.year, "YYYY", true);
 
 	if (!parsedDate.isValid()) {
