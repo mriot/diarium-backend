@@ -12,9 +12,10 @@ db.authenticate()
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/api/auth", require("./routes/users"));
+app.use("/api/auth", require("./routes/auth"));
 app.use("/api/entries", require("./routes/entries"));
 
 
