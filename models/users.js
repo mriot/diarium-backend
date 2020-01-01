@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config/database");
 
-const Auth = db.define("auth", {
+const User = db.define("user", {
 	id: {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
@@ -14,3 +14,8 @@ const Auth = db.define("auth", {
 		type: Sequelize.STRING
 	}
 });
+
+// create table (force will drop existing table first)
+User.sync({ force: false });
+
+module.exports = User;
