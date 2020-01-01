@@ -1,4 +1,4 @@
-console.clear();
+require("dotenv").config();
 const express = require("express");
 const db = require("./config/database");
 
@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/entries", require("./routes/entries"));
+app.use("/api/jwt", require("./routes/jwt-info"));
 
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
