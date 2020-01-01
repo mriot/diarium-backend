@@ -2,27 +2,10 @@ const express = require("express");
 const moment = require("moment");
 const Sequelize = require("sequelize");
 const Joi = require("@hapi/joi");
-const jwt = require("jsonwebtoken");
+const verifyJWT = require("../config/jwt");
 const Entries = require("../models/entries");
 
 const router = express.Router();
-
-const verifyJWT = (req, res, next) => {
-	const token = (req.headers.authorization && req.headers.authorization.split(" ")[1]) || false;
-
-	if (!token) {
-		res.sendStatus(401);
-		next();
-		return;
-	}
-
-	jwt.verify(token, "mysecret", (err, decoded) => {
-		if (err) {
-			res.status(401).json({ err });
-		}
-		next();
-	});
-};
 
 /**
  * =============== [ GET - REQUESTS] ===============
@@ -77,7 +60,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 
 
 // ALL ENTRIES FOR GIVEN YEAR:MONTH PAIR
-router.get("/:year/:month", (req, res) => {
+router.get("/:year/:month", verifyJWT, (req, res) => {
 	const parsedDate = moment(`${req.params.year}-${req.params.month}`, "YYYY-MM", true);
 
 	if (!parsedDate.isValid()) {
@@ -107,7 +90,7 @@ router.get("/:year/:month", (req, res) => {
 
 
 // SINGLE ENTRY (matching year/month/day)
-router.get("/:year/:month/:day", (req, res) => {
+router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 	const parsedDate = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
 
 	if (!parsedDate.isValid()) {
@@ -130,7 +113,7 @@ router.get("/:year/:month/:day", (req, res) => {
  */
 
 // CREATE SINGLE ENTRY
-router.post("/:year/:month/:day", (req, res) => {
+router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 	const assignedDay = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
 
 	// strictly check if date matches our format
@@ -182,7 +165,7 @@ router.post("/:year/:month/:day", (req, res) => {
  */
 
 // UPDATE SINGLE ENTRY
-router.put("/", (req, res) => {
+router.put("/", verifyJWT, (req, res) => {
 	if (!req.query.id) res.status(400).json({ error: "No ID specified" });
 	Entries.findOne({
 		where: {
@@ -218,7 +201,7 @@ router.put("/", (req, res) => {
 
 
 // DELETE SINGLE ENTRY
-router.delete("/", (req, res) => {
+router.delete("/", verifyJWT, (req, res) => {
 	if (!req.query.id) res.status(400).json({ error: "No ID specified" });
 	Entries.findOne({
 		where: {
