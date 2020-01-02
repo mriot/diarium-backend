@@ -37,7 +37,7 @@ router.post("/", (req, res) => {
 				username: user.dataValues.username
 			}, process.env.JWT_SECRET, { expiresIn: "12h" }, (err, token) => {
 				if (err) {
-					res.status(500).json({ error: "Some server sided error occured" });
+					res.status(500).json({ error: "Something went wrong. Please try again." });
 					return;
 				}
 	
