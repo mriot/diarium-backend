@@ -2,6 +2,7 @@ console.clear();
 
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const db = require("./config/database");
 
 const port = process.env.PORT || 5000;
@@ -13,6 +14,7 @@ db.authenticate()
 	.catch(err => console.error("Unable to connect to the database:", err));
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
