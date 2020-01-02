@@ -26,7 +26,7 @@ const verifyJWT = (req, res, next) => {
 		delete payload.exp;
 		delete payload.iat;
 
-		jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" }, (signErr, newToken) => {
+		jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "12h" }, (signErr, newToken) => {
 			if (signErr) {
 				res.status(500).json({ error: "Some server sided error occured" });
 				return;
