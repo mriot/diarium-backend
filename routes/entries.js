@@ -11,6 +11,13 @@ const router = express.Router();
  * =============== [ GET - REQUESTS] ===============
  */
 
+// COUNT ALL ENTRIES
+router.get("/count/:year?/:month?", (req, res) => {
+	Entries.count()
+		.then(count => res.json({ all_records: count }));
+});
+
+
 // GET ALL ENTRIES OR ONE BY ID
 router.get("/", verifyJWT, (req, res) => {
 	if (req.query.id) {
@@ -43,12 +50,12 @@ router.get("/:year", verifyJWT, (req, res) => {
 			[Sequelize.Op.and]: [
 				{
 					assignedDay: {
-						[Sequelize.Op.gte]: moment(req.params.year, "YYYY")
+						[Sequelize.Op.gte]: parsedDate
 					}
 				},
 				{
 					assignedDay: {
-						[Sequelize.Op.lt]: moment(req.params.year, "YYYY").add(1, "year")
+						[Sequelize.Op.lt]: parsedDate.add(1, "year")
 					}
 				}
 			]
