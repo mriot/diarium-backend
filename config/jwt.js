@@ -11,7 +11,6 @@ const verifyJWT = (req, res, next) => {
 
 	if (!token) {
 		res.sendStatus(401);
-		next();
 		return;
 	}
 
@@ -20,6 +19,24 @@ const verifyJWT = (req, res, next) => {
 			res.status(401).json({ err });
 			return;
 		}
+
+		// "refresh" the valid token (=> same payload, new 'exp' and 'iat' date)
+		// NOTE: the old token stays valid until it reaches it's expiry date
+		const payload = decoded;
+		delete payload.exp;
+		delete payload.iat;
+
+		jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" }, (signErr, newToken) => {
+			if (signErr) {
+				res.status(500).json({ error: "Some server sided error occured" });
+				return;
+			}
+
+			// set header on response object with the new, extended token
+			res.set("token", newToken);
+		});
+
+		// call next middleware function in stack
 		next();
 	});
 };
