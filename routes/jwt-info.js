@@ -17,18 +17,15 @@ router.post("/", (req, res) => {
 		return;
 	}
 
+	const decodedJWT = jwt.decode(req.body.token);
 	jwt.verify(req.body.token, process.env.JWT_SECRET, (err, decoded) => {
-		if (err) {
-			res.status(401).json({ err });
-			return;
-		}
-
 		res.send({
-			decoded,
+			_isValid: err ? `false (${err.message})` : true,
+			decodedJWT,
 			human_readable: {
-				issued_at: moment.unix(decoded.iat).format("YYYY-MM-DD HH:mm:ss Z"),
-				expires_at: moment.unix(decoded.exp).format("YYYY-MM-DD HH:mm:ss Z"),
-			}
+				issued_at: moment.unix(decodedJWT.iat).format("YYYY-MM-DD HH:mm:ss Z"),
+				expires_at: moment.unix(decodedJWT.exp).format("YYYY-MM-DD HH:mm:ss Z"),
+			},
 		});
 	});
 });
