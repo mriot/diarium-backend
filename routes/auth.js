@@ -41,7 +41,7 @@ router.post("/", (req, res) => {
 					return;
 				}
 	
-				res.send(token);
+				res.json({ token });
 			});
 		});
 	});
