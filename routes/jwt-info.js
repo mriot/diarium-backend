@@ -17,7 +17,7 @@ router.post("/", (req, res) => {
 		return;
 	}
 
-	const decodedJWT = jwt.decode(req.body.token);
+	const decodedJWT = jwt.decode(req.body.token, { complete: true });
 	jwt.verify(req.body.token, process.env.JWT_SECRET, (err, decoded) => {
 		res.send({
 			_isValid: err ? `false (${err.message})` : true,
