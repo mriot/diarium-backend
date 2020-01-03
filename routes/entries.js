@@ -50,12 +50,12 @@ router.get("/:year", verifyJWT, (req, res) => {
 			[Sequelize.Op.and]: [
 				{
 					assignedDay: {
-						[Sequelize.Op.gte]: parsedDate
+						[Sequelize.Op.gte]: parsedDate.format()
 					}
 				},
 				{
 					assignedDay: {
-						[Sequelize.Op.lt]: parsedDate.add(1, "year")
+						[Sequelize.Op.lt]: parsedDate.add(1, "year").format()
 					}
 				}
 			]
@@ -80,12 +80,12 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 			[Sequelize.Op.and]: [
 				{
 					assignedDay: {
-						[Sequelize.Op.gte]: parsedDate
+						[Sequelize.Op.gte]: parsedDate.format()
 					}
 				},
 				{
 					assignedDay: {
-						[Sequelize.Op.lt]: parsedDate.add(1, "month")
+						[Sequelize.Op.lt]: parsedDate.add(1, "month").format()
 					}
 				}
 			]
@@ -107,7 +107,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 
 	Entries.findOne({
 		where: {
-			assignedDay: parsedDate
+			assignedDay: parsedDate.format()
 		},
 	})
 		.then(entry => (entry !== null ? res.send(entry) : res.sendStatus(404)))
