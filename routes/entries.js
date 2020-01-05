@@ -19,14 +19,18 @@ router.get("/search", verifyJWT, (req, res) => {
 	}
 	
 	if (req.query.q.length < 3) {
-		res.status(400).json({ error: "Query must contain three or more letters" });
+		res.status(400).json({ error: "Query must contain at least three characters" });
 		return;
 	}
+
+	const queryArray = req.query.q.split(" ");
 
 	Entries.findAll({
 		where: {
 			content: {
-				[Sequelize.Op.like]: `%${req.query.q}%`
+				[Sequelize.Op.and]: queryArray.map(queryItem => ({
+					[Sequelize.Op.like]: `%${queryItem}%`
+				}))
 			}
 		}
 	})
