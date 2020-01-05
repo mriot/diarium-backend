@@ -17,11 +17,6 @@ router.get("/search", verifyJWT, (req, res) => {
 		res.status(400).json({ error: "No query specified" });
 		return;
 	}
-	
-	if (req.query.q.length < 3) {
-		res.status(400).json({ error: "Query must contain at least three characters" });
-		return;
-	}
 
 	const queryArray = req.query.q.split(" ");
 
