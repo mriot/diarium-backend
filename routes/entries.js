@@ -11,7 +11,36 @@ const router = express.Router();
  * =============== [ GET - REQUESTS] ===============
  */
 
-// COUNT ALL ENTRIES
+// SEARCH
+router.get("/search", verifyJWT, (req, res) => {
+	if (!req.query.q) {
+		res.status(400).json({ error: "No query specified" });
+		return;
+	}
+	
+	if (req.query.q.length < 3) {
+		res.status(400).json({ error: "Query must contain three or more letters" });
+		return;
+	}
+
+	Entries.findAll({
+		where: {
+			content: {
+				[Sequelize.Op.like]: `%${req.query.q}%`
+			}
+		}
+	})
+		.then(entries => {
+			res.send({
+				records_found: entries.length,
+				records: entries,
+			});
+		});
+});
+
+
+// COUNT ENTRIES
+// TODO: implement year and month filter
 router.get("/count/:year?/:month?", (req, res) => {
 	Entries.count()
 		.then(count => res.json({ all_records: count }));
