@@ -69,7 +69,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 	const parsedDate = moment(req.params.year, "YYYY", true);
 
 	if (!parsedDate.isValid()) {
-		res.status(400).json({ error: `${parsedDate}` });
+		res.status(400).json({ error: parsedDate.toString(), required_format: "YYYY" });
 		return;
 	}
 
@@ -96,10 +96,11 @@ router.get("/:year", verifyJWT, (req, res) => {
 
 // ALL ENTRIES FOR GIVEN YEAR:MONTH PAIR
 router.get("/:year/:month", verifyJWT, (req, res) => {
-	const parsedDate = moment(`${req.params.year}-${req.params.month}`, "YYYY-MM", true);
+	const { year, month } = req.params;
+	const parsedDate = moment(`${year}-${month}`, "YYYY-MM", true);
 
 	if (!parsedDate.isValid()) {
-		res.status(400).json({ error: `${parsedDate}` });
+		res.status(400).json({ error: parsedDate.toString(), required_format: "YYYY-MM" });
 		return;
 	}
 
@@ -126,10 +127,11 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 
 // SINGLE ENTRY (matching year/month/day)
 router.get("/:year/:month/:day", verifyJWT, (req, res) => {
-	const parsedDate = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
+	const { year, month, day } = req.params;
+	const parsedDate = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
 
 	if (!parsedDate.isValid()) {
-		res.status(400).json({ error: `${parsedDate}` });
+		res.status(400).json({ error: parsedDate.toString(), required_format: "YYYY-MM-DD" });
 		return;
 	}
 
@@ -149,11 +151,12 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 
 // CREATE SINGLE ENTRY
 router.post("/:year/:month/:day", verifyJWT, (req, res) => {
-	const assignedDay = moment(`${req.params.year}-${req.params.month}-${req.params.day}`, "YYYY-MM-DD", true);
+	const { year, month, day } = req.params;
+	const assignedDay = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
 
 	// strictly check if date matches our format
 	if (!assignedDay.isValid()) {
-		res.status(400).json({ error: `${assignedDay}` });
+		res.status(400).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
 		return;
 	}
 
@@ -167,7 +170,9 @@ router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 	})
 		.then(existingEntry => {
 			if (existingEntry) {
-				res.status(409).json({ error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists` });
+				res.status(409).json({
+					error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists`
+				});
 				return;
 			}
 
@@ -201,7 +206,11 @@ router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 
 // UPDATE SINGLE ENTRY
 router.put("/", verifyJWT, (req, res) => {
-	if (!req.query.id) res.status(400).json({ error: "No ID specified" });
+	if (!req.query.id) {
+		res.status(400).json({ error: "No ID specified" });
+		return;
+	}
+
 	Entries.findOne({
 		where: {
 			id: req.query.id
@@ -237,7 +246,11 @@ router.put("/", verifyJWT, (req, res) => {
 
 // DELETE SINGLE ENTRY
 router.delete("/", verifyJWT, (req, res) => {
-	if (!req.query.id) res.status(400).json({ error: "No ID specified" });
+	if (!req.query.id) {
+		res.status(400).json({ error: "No ID specified" });
+		return;
+	}
+	
 	Entries.findOne({
 		where: {
 			id: req.query.id
