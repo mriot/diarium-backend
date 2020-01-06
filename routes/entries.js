@@ -142,7 +142,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 			assignedDay: parsedDate.format()
 		},
 	})
-		.then(entry => res.send(entry))
+		.then(entry => res.json(entry))
 		.catch(error => console.log(error));
 });
 
