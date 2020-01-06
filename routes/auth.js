@@ -23,13 +23,13 @@ router.post("/", (req, res) => {
 		where: { username: req.body.username },
 	}).then(user => {
 		if (!user) {
-			res.status(401).json({ error: "Credentials are incorrect" });
+			res.status(401).json({ error: "Credentials are incorrect." });
 			return;
 		}
 
 		bcrypt.compare(req.body.password, user.password).then(match => {
 			if (!match) {
-				res.status(401).json({ error: "Credentials are incorrect" });
+				res.status(401).json({ error: "Credentials are incorrect." });
 				return;
 			}
 
