@@ -34,7 +34,8 @@ router.get("/search", verifyJWT, (req, res) => {
 				records_found: entries.length,
 				records: entries,
 			});
-		});
+		})
+		.catch(error => console.log(error));
 });
 
 
@@ -42,7 +43,8 @@ router.get("/search", verifyJWT, (req, res) => {
 // TODO: implement year and month filter
 router.get("/count/:year?/:month?", (req, res) => {
 	Entries.count()
-		.then(count => res.json({ all_records: count }));
+		.then(count => res.json({ all_records: count }))
+		.catch(error => console.log(error));
 });
 
 
@@ -54,11 +56,11 @@ router.get("/", verifyJWT, (req, res) => {
 				id: req.query.id
 			}
 		})
-			.then(entry => (entry !== null ? res.send(entry) : res.sendStatus(404)))
+			.then(entry => res.send(entry))
 			.catch(error => console.log(error));
 	} else {
 		Entries.findAll()
-			.then(entries => (entries.length < 1 ? res.sendStatus(404) : res.send(entries)))
+			.then(entries => res.send(entries))
 			.catch(error => console.log(error));
 	}
 });
@@ -89,7 +91,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 			]
 		},
 	})
-		.then(entries => (entries.length < 1 ? res.sendStatus(404) : res.send(entries)))
+		.then(entries => res.send(entries))
 		.catch(error => console.log(error));
 });
 
@@ -120,7 +122,7 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 			]
 		},
 	})
-		.then(entries => (entries.length < 1 ? res.sendStatus(404) : res.send(entries)))
+		.then(entries => res.send(entries))
 		.catch(error => console.log(error));
 });
 
@@ -140,7 +142,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 			assignedDay: parsedDate.format()
 		},
 	})
-		.then(entry => (entry !== null ? res.send(entry) : res.sendStatus(404)))
+		.then(entry => res.send(entry))
 		.catch(error => console.log(error));
 });
 
@@ -195,7 +197,8 @@ router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 				tags: req.body.tags,
 				contentType: req.body.contentType, // default: text/markdown
 			})
-				.then(newEntry => res.json(newEntry));
+				.then(newEntry => res.json(newEntry))
+				.catch(createError => console.log(createError));
 		});
 });
 
@@ -239,7 +242,9 @@ router.put("/", verifyJWT, (req, res) => {
 				content: req.body.content,
 				tags: req.body.tags,
 				contentType: req.body.contentType,
-			}).then(updatedEntry => res.send(updatedEntry));
+			})
+				.then(updatedEntry => res.send(updatedEntry))
+				.catch(updateError => console.log(updateError));
 		});
 });
 
@@ -262,7 +267,9 @@ router.delete("/", verifyJWT, (req, res) => {
 				return;
 			}
 
-			existingEntry.destroy().then(deletedEntry => res.send(deletedEntry));
+			existingEntry.destroy()
+				.then(deletedEntry => res.send(deletedEntry))
+				.catch(deleteError => console.log(deleteError));
 		});
 });
 
