@@ -48,6 +48,46 @@ router.get("/count/:year?/:month?", (req, res) => {
 });
 
 
+router.get("/range", verifyJWT, (req, res) => {
+	const { start, end, column } = req.query;
+	const startDate = moment(start, "YYYY-MM-DD", true);
+	const endDate = moment(end, "YYYY-MM-DD", true);
+
+	if (!startDate.isValid() || !endDate.isValid()) {
+		res.status(400).json({
+			error: "Parameters 'start' and 'end' are required and have to be a valid date (YYYY-MM-DD)",
+		});
+		return;
+	}
+
+	Entries.findAll({
+		// eslint-disable-next-line no-nested-ternary
+		attributes: column ? Array.isArray(column) ? column : new Array(column) : null,
+		where: {
+			[Sequelize.Op.and]: [
+				{
+					assignedDay: {
+						[Sequelize.Op.gte]: startDate.format()
+					}
+				},
+				{
+					assignedDay: {
+						[Sequelize.Op.lt]: endDate.format()
+					}
+				}
+			]
+		},
+	})
+		.then(entries => res.send(entries))
+		.catch(error => {
+			res.status(500).json({
+				error: error.original.toString()
+			});
+			console.log(error);
+		});
+});
+
+
 // GET ALL ENTRIES OR ONE BY ID
 router.get("/", verifyJWT, (req, res) => {
 	if (req.query.id) {
