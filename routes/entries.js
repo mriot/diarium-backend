@@ -47,10 +47,18 @@ router.get("/count", (req, res) => {
 });
 
 
-router.get("/range", verifyJWT, (req, res) => {
+router.get("/range/:count?", verifyJWT, (req, res) => {
+	const { count } = req.params;
 	const { start, end, column } = req.query;
 	const startDate = moment(start, "YYYY-MM-DD", true);
 	const endDate = moment(end, "YYYY-MM-DD", true);
+
+	if (count && count !== "count") {
+		res.status(400).json({
+			error: `Invalid path '/range/${count}/' — Try instead '/range/count/'`,
+		});
+		return;
+	}
 
 	if (!startDate.isValid() || !endDate.isValid()) {
 		res.status(400).json({
@@ -59,7 +67,7 @@ router.get("/range", verifyJWT, (req, res) => {
 		return;
 	}
 
-	Entries.findAll({
+	const QUERY_MODEL = {
 		// eslint-disable-next-line no-nested-ternary
 		attributes: column ? Array.isArray(column) ? column : new Array(column) : null,
 		where: {
@@ -76,8 +84,24 @@ router.get("/range", verifyJWT, (req, res) => {
 				}
 			]
 		},
-	})
-		.then(entries => res.send(entries))
+	};
+
+	if (count) {
+		Entries.count(QUERY_MODEL)
+			.then(countValue => res.json({
+				records_in_range: countValue
+			}))
+			.catch(error => {
+				res.status(500).json({
+					error: error.original.toString()
+				});
+				console.log(error);
+			});
+		return;
+	}
+
+	Entries.findAll(QUERY_MODEL)
+		.then(entries => res.json(entries))
 		.catch(error => {
 			res.status(500).json({
 				error: error.original.toString()
