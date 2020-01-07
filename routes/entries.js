@@ -39,9 +39,8 @@ router.get("/search", verifyJWT, (req, res) => {
 });
 
 
-// COUNT ENTRIES
-// TODO: implement year and month filter
-router.get("/count/:year?/:month?", (req, res) => {
+// COUNT ALL
+router.get("/count", (req, res) => {
 	Entries.count()
 		.then(count => res.json({ all_records: count }))
 		.catch(error => console.log(error));
