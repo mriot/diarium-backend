@@ -289,9 +289,10 @@ router.put("/", verifyJWT, (req, res) => {
 			}
 
 			const schema = Joi.object({
-				content: Joi.string().required(),
-				tags: Joi.string(),
+				assignedDay: Joi.date().optional(),
+				content: Joi.string().optional(),
 				contentType: Joi.string().optional(),
+				tags: Joi.string().optional(),
 			});
 		
 			const { error, value } = schema.validate(req.body);
@@ -301,11 +302,13 @@ router.put("/", verifyJWT, (req, res) => {
 				return;
 			}
 
-			existingEntry.update({
-				content: req.body.content,
-				tags: req.body.tags,
-				contentType: req.body.contentType,
-			})
+			const config = {};
+			if (req.body.assignedDay) config.assignedDay = req.body.assignedDay;
+			if (req.body.content) config.content = req.body.content;
+			if (req.body.contentType) config.contentType = req.body.contentType;
+			if (req.body.tags) config.tags = req.body.tags;
+
+			existingEntry.update(config)
 				.then(updatedEntry => res.send(updatedEntry))
 				.catch(updateError => console.log(updateError));
 		});
