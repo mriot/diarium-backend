@@ -302,13 +302,15 @@ router.put("/", verifyJWT, (req, res) => {
 				return;
 			}
 
-			const config = {};
-			if (req.body.assignedDay) config.assignedDay = req.body.assignedDay;
-			if (req.body.content) config.content = req.body.content;
-			if (req.body.contentType) config.contentType = req.body.contentType;
-			if (req.body.tags) config.tags = req.body.tags;
+			const queryConfig = {};
+			const { assignedDay, content, contentType, tags } = req.body;
 
-			existingEntry.update(config)
+			if (assignedDay) queryConfig.assignedDay = assignedDay;
+			if (content) 		 queryConfig.content 		 = content;
+			if (contentType) queryConfig.contentType = contentType;
+			if (tags)				 queryConfig.tags 			 = tags;
+
+			existingEntry.update(queryConfig)
 				.then(updatedEntry => res.send(updatedEntry))
 				.catch(updateError => console.log(updateError));
 		});
