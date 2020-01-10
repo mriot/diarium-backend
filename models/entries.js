@@ -19,6 +19,12 @@ const Entry = db.define("entry", {
 	},
 	tags: {
 		type: Sequelize.STRING,
+		get() {
+			return JSON.parse(this.getDataValue("tags"));
+		},
+		set(value) {
+			return this.setDataValue("tags", JSON.stringify(value));
+		}
 	},
 	createdAt: {
 		type: Sequelize.DATE,
