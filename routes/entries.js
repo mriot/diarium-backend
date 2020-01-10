@@ -20,7 +20,7 @@ router.get("/search", verifyJWT, (req, res) => {
 
 	const queryArray = req.query.q.split(" ");
 
-	Entries.findAll({
+	Entries.findAndCountAll({
 		where: {
 			content: {
 				[Sequelize.Op.and]: queryArray.map(queryItem => ({
@@ -31,8 +31,8 @@ router.get("/search", verifyJWT, (req, res) => {
 	})
 		.then(entries => {
 			res.send({
-				records_found: entries.length,
-				records: entries,
+				count: entries.count,
+				records: entries.rows,
 			});
 		})
 		.catch(error => console.log(error));
@@ -100,8 +100,11 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 		return;
 	}
 
-	Entries.findAll(QUERY_MODEL)
-		.then(entries => res.json(entries))
+	Entries.findAndCountAll(QUERY_MODEL)
+		.then(entries => res.json({
+			count: entries.count,
+			entries: entries.rows
+		}))
 		.catch(error => {
 			res.status(500).json({
 				error: error.original.toString()
@@ -122,8 +125,11 @@ router.get("/", verifyJWT, (req, res) => {
 			.then(entry => res.json(entry))
 			.catch(error => console.log(error));
 	} else {
-		Entries.findAll()
-			.then(entries => res.json(entries))
+		Entries.findAndCountAll()
+			.then(entries => res.json({
+				count: entries.count,
+				entries: entries.rows
+			}))
 			.catch(error => console.log(error));
 	}
 });
@@ -138,7 +144,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 		return;
 	}
 
-	Entries.findAll({
+	Entries.findAndCountAll({
 		where: {
 			[Sequelize.Op.and]: [
 				{
@@ -154,7 +160,10 @@ router.get("/:year", verifyJWT, (req, res) => {
 			]
 		},
 	})
-		.then(entries => res.json(entries))
+		.then(entries => res.json({
+			count: entries.count,
+			entries: entries.rows
+		}))
 		.catch(error => console.log(error));
 });
 
@@ -169,7 +178,7 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 		return;
 	}
 
-	Entries.findAll({
+	Entries.findAndCountAll({
 		where: {
 			[Sequelize.Op.and]: [
 				{
@@ -185,7 +194,10 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 			]
 		},
 	})
-		.then(entries => res.json(entries))
+		.then(entries => res.json({
+			count: entries.count,
+			entries: entries.rows
+		}))
 		.catch(error => console.log(error));
 });
 
