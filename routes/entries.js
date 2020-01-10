@@ -8,7 +8,7 @@ const Entries = require("../models/entries");
 const router = express.Router();
 
 /**
- * =============== [ GET - REQUESTS] ===============
+ * =============== [ GET - REQUESTS ] ===============
  */
 
 // SEARCH
@@ -119,11 +119,11 @@ router.get("/", verifyJWT, (req, res) => {
 				id: req.query.id
 			}
 		})
-			.then(entry => res.send(entry))
+			.then(entry => res.json(entry))
 			.catch(error => console.log(error));
 	} else {
 		Entries.findAll()
-			.then(entries => res.send(entries))
+			.then(entries => res.json(entries))
 			.catch(error => console.log(error));
 	}
 });
@@ -154,7 +154,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 			]
 		},
 	})
-		.then(entries => res.send(entries))
+		.then(entries => res.json(entries))
 		.catch(error => console.log(error));
 });
 
@@ -185,12 +185,12 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 			]
 		},
 	})
-		.then(entries => res.send(entries))
+		.then(entries => res.json(entries))
 		.catch(error => console.log(error));
 });
 
 
-// SINGLE ENTRY (matching year/month/day)
+// GET SINGLE ENTRY (matching year/month/day)
 router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 	const { year, month, day } = req.params;
 	const parsedDate = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
@@ -211,7 +211,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 
 
 /**
- * =============== [ POST - REQUESTS] ===============
+ * =============== [ POST - REQUESTS ] ===============
  */
 
 // CREATE SINGLE ENTRY
@@ -242,9 +242,10 @@ router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 			}
 
 			const schema = Joi.object({
+				assignedDay: Joi.date().required(),
 				content: Joi.string().required(),
-				tags: Joi.string(),
-				contentType: Joi.string().optional(),
+				contentType: Joi.string().required(),
+				tags: Joi.array().required(),
 			});
 		
 			const { error, value } = schema.validate(req.body);
@@ -267,7 +268,7 @@ router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 
 
 /**
- * =============== [ PUT - REQUESTS] ===============
+ * =============== [ PUT - REQUESTS ] ===============
  */
 
 // UPDATE SINGLE ENTRY
@@ -292,7 +293,7 @@ router.put("/", verifyJWT, (req, res) => {
 				assignedDay: Joi.date().optional(),
 				content: Joi.string().optional(),
 				contentType: Joi.string().optional(),
-				tags: Joi.string().optional(),
+				tags: Joi.array().optional(),
 			});
 		
 			const { error, value } = schema.validate(req.body);
@@ -316,6 +317,10 @@ router.put("/", verifyJWT, (req, res) => {
 		});
 });
 
+
+/**
+ * =============== [ DELETE - REQUESTS ] ===============
+ */
 
 // DELETE SINGLE ENTRY
 router.delete("/", verifyJWT, (req, res) => {
