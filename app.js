@@ -16,22 +16,20 @@ db.authenticate()
 
 // Middleware
 app.use((req, res, next) => {
+	console.log("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖");
+	console.log(`\n📨 ${req.method} ${req.url} • ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
+
+	// console.log("▶ HEADERS:\n", req.headers);
+	// console.log("▶ PARAMS:\n", req.params);
+	// console.log("▶ QUERY:\n", req.query);
+	// console.log("▶ BODY:\n", req.body);
+
 	// console.log(req.headers);
 	// console.log(req.body);
 	// console.log(req.method);
 	// console.log(req.url);
 	// console.log(req.params);
 	// console.log(req.query);
-
-	// TODO: Count requests — provide daily/etc overview -> monitor it somehow
-
-	console.log("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖");
-	console.log(`\n📨 ${req.method} REQUEST ON ENDPOINT ${req.url} • ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
-	console.log("———————————————————————————————————————————————————————————————————————————————————————————————————————————");
-	console.log("▶ HEADERS:\n", req.headers);
-	console.log("▶ PARAMS:\n", req.params);
-	console.log("▶ QUERY:\n", req.query);
-	console.log("▶ BODY:\n", req.body);
 
 	next();
 });
