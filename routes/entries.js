@@ -227,13 +227,34 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
  */
 
 // CREATE SINGLE ENTRY
-router.post("/:year/:month/:day", verifyJWT, (req, res) => {
-	const { year, month, day } = req.params;
-	const assignedDay = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
+router.post("/", verifyJWT, (req, res) => {
+	const assignedDay = moment(req.body.assignedDay, "YYYY-MM-DD", true);
 
 	// strictly check if date matches our format
 	if (!assignedDay.isValid()) {
 		res.status(400).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
+		return;
+	}
+
+	const schema = Joi.object({
+		assignedDay: Joi.date().required(),
+		content: Joi.string().required(),
+		contentType: Joi.string().required(),
+		tags: Joi.array().required(),
+	});
+
+	const { error } = schema.validate(req.body);
+
+	if (error) {
+		res.status(400).json({
+			error: "The data has to match the schema below.",
+			schema: {
+				assignedDay: "DATE (YYYY-MM-DD)",
+				content: "STRING",
+				contentType: "STRING (e.g. text/markdown)",
+				tags: "ARRAY [tag1, tag2, ...]"
+			}
+		});
 		return;
 	}
 
@@ -248,30 +269,16 @@ router.post("/:year/:month/:day", verifyJWT, (req, res) => {
 		.then(existingEntry => {
 			if (existingEntry) {
 				res.status(409).json({
-					error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists`
+					error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists!`
 				});
-				return;
-			}
-
-			const schema = Joi.object({
-				assignedDay: Joi.date().required(),
-				content: Joi.string().required(),
-				contentType: Joi.string().required(),
-				tags: Joi.array().required(),
-			});
-		
-			const { error, value } = schema.validate(req.body);
-		
-			if (error) {
-				res.status(400).json({ error });
 				return;
 			}
 		
 			Entries.create({
-				assignedDay, // derived from URL path
+				assignedDay,
 				content: req.body.content,
 				tags: req.body.tags,
-				contentType: req.body.contentType, // default: text/markdown
+				contentType: req.body.contentType,
 			})
 				.then(newEntry => res.json(newEntry))
 				.catch(createError => console.log(createError));
