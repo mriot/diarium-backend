@@ -17,6 +17,8 @@ module.exports = {
     "rules": {
       quotes: ["warn", "double"],
       "no-tabs": ["off"],
+      "no-plusplus": "off",
+      "no-continue": "off",
       "object-curly-newline": ["off"],
       "template-tag-spacing": ["error", "always"],
       "arrow-parens": ["error", "as-needed"],
