@@ -1,21 +1,28 @@
 const Sequelize = require("sequelize");
 const db = require("../config/database");
+const options = require("../config/options");
 
 const User = db.define("user", {
-	id: {
+	user_id: {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
 	},
 	username: {
-		type: Sequelize.STRING
+		type: Sequelize.STRING,
+		allowNull: false,
+		unique: true
 	},
 	password: {
-		type: Sequelize.STRING
+		type: Sequelize.STRING,
+		allowNull: false
 	}
-});
+}, options);
 
-// create table (force will drop existing table first)
-User.sync({ force: false });
+/**
+ * creates the table
+ * - CAUTION - setting force to true, will drop the existing table first!
+ */
+User.sync({ force: true });
 
 module.exports = User;

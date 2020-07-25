@@ -1,29 +1,25 @@
 const Sequelize = require("sequelize");
 const db = require("../config/database");
-
-// NOTE: I've added getters to all of them — even though we only need it on "tags"
-// I did this to fix the scrambled order in the final JSON. (I know it doesn't really matter 😬 )
-// I'm not sure why this happens, probably async stuff (?)
+const options = require("../config/options");
 
 const Entry = db.define("entry", {
-	id: {
+	entry_id: {
 		type: Sequelize.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
-		get() { return this.getDataValue("id"); },
 	},
-	assignedDay: {
+	assigned_day: {
 		type: Sequelize.DATEONLY,
-		get() { return this.getDataValue("assignedDay"); },
+		allowNull: false,
+		unique: true
 	},
-	content: {
+	content: { // JSON
 		type: Sequelize.TEXT,
-		get() { return this.getDataValue("content"); },
+		allowNull: false
 	},
-	contentType: {
-		type: Sequelize.STRING,
-		defaultValue: "text/markdown",
-		get() { return this.getDataValue("contentType"); },
+	sanitized_content: { // text extracted from JSON to make it easily searchable
+		type: Sequelize.TEXT,
+		allowNull: false
 	},
 	tags: {
 		type: Sequelize.STRING,
@@ -33,16 +29,13 @@ const Entry = db.define("entry", {
 		set(value) {
 			return this.setDataValue("tags", JSON.stringify(value));
 		}
-	},
-	createdAt: {
-		type: Sequelize.DATE,
-	},
-	updatedAt: {
-		type: Sequelize.DATE,
-	},
-});
+	}
+}, options);
 
-// create table (force will drop existing table first)
-Entry.sync({ force: false });
+/**
+ * creates the table
+ * - CAUTION - setting force to true, will drop the existing table first!
+ */
+Entry.sync({ force: true });
 
 module.exports = Entry;
