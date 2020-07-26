@@ -333,14 +333,20 @@ router.put("/", verifyJWT, (req, res) => {
 				return;
 			}
 
+			// determine what to update
 			const queryConfig = {};
 			const { assignedDay, content, tags } = req.body;
 
-			if (assignedDay) queryConfig.assigned_day = assignedDay;
-			if (tags)				 queryConfig.tags 			 	= tags;
+			if (assignedDay) {
+				queryConfig.assigned_day = assignedDay;
+			}
+			if (tags) {
+				queryConfig.tags = tags;
+			}
 			if (content) {
-				queryConfig.content = content;
+				queryConfig.content = JSON.stringify(content);
 				queryConfig.sanitized_content = sanitize(content);
+				console.log(content);
 			}
 
 			existingEntry.update(queryConfig)
