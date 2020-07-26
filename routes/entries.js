@@ -24,7 +24,7 @@ router.get("/search", verifyJWT, (req, res) => {
 
 	Entries.findAndCountAll({
 		where: {
-			content: {
+			sanitized_content: {
 				[Sequelize.Op.and]: queryArray.map(queryItem => ({
 					[Sequelize.Op.like]: `%${queryItem}%`
 				}))
