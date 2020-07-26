@@ -5,6 +5,7 @@ const Joi = require("@hapi/joi");
 const logger = require("node-color-log");
 const verifyJWT = require("../middleware/jwt");
 const Entries = require("../models/entries");
+const sanitize = require("./functions/sanitizer");
 
 const router = express.Router();
 
@@ -74,12 +75,12 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 		where: {
 			[Sequelize.Op.and]: [
 				{
-					assignedDay: {
+					assigned_day: {
 						[Sequelize.Op.gte]: startDate.format()
 					}
 				},
 				{
-					assignedDay: {
+					assigned_day: {
 						[Sequelize.Op.lt]: endDate.format()
 					}
 				}
@@ -120,7 +121,7 @@ router.get("/", verifyJWT, (req, res) => {
 	if (req.query.id) {
 		Entries.findOne({
 			where: {
-				id: req.query.id
+				entry_id: req.query.id
 			}
 		})
 			.then(entry => res.json(entry))
@@ -149,12 +150,12 @@ router.get("/:year", verifyJWT, (req, res) => {
 		where: {
 			[Sequelize.Op.and]: [
 				{
-					assignedDay: {
+					assigned_day: {
 						[Sequelize.Op.gte]: parsedDate.format()
 					}
 				},
 				{
-					assignedDay: {
+					assigned_day: {
 						[Sequelize.Op.lt]: parsedDate.add(1, "year").format()
 					}
 				}
@@ -183,12 +184,12 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 		where: {
 			[Sequelize.Op.and]: [
 				{
-					assignedDay: {
+					assigned_day: {
 						[Sequelize.Op.gte]: parsedDate.format()
 					}
 				},
 				{
-					assignedDay: {
+					assigned_day: {
 						[Sequelize.Op.lt]: parsedDate.add(1, "month").format()
 					}
 				}
@@ -215,7 +216,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 
 	Entries.findOne({
 		where: {
-			assignedDay: parsedDate.format()
+			assigned_day: parsedDate.format()
 		},
 	})
 		.then(entry => res.json(entry))
@@ -229,7 +230,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 
 // CREATE SINGLE ENTRY
 router.post("/", verifyJWT, (req, res) => {
-	const assignedDay = moment(req.body.assignedDay, "YYYY-MM-DD", true);
+	const assignedDay = moment(req.body.assigned_day, "YYYY-MM-DD", true);
 
 	// strictly check if date matches our format
 	if (!assignedDay.isValid()) {
@@ -238,9 +239,12 @@ router.post("/", verifyJWT, (req, res) => {
 	}
 
 	const schema = Joi.object({
-		assignedDay: Joi.date().required(),
-		content: Joi.string().required(),
-		contentType: Joi.string().required(),
+		assigned_day: Joi.date().required(),
+		content: Joi.object({
+			time: Joi.number().required(),
+			blocks: Joi.array().required(),
+			version: Joi.string().required()
+		}).required(),
 		tags: Joi.array().required(),
 	});
 
@@ -250,9 +254,12 @@ router.post("/", verifyJWT, (req, res) => {
 		res.status(400).json({
 			error: "The data has to match the schema below.",
 			schema: {
-				assignedDay: "DATE (YYYY-MM-DD)",
-				content: "STRING",
-				contentType: "STRING (e.g. text/markdown)",
+				assigned_day: "DATE (YYYY-MM-DD)",
+				content: {
+					time: "NUMBER (unix timestamp)",
+					blocks: "ARRAY [{}, {}, ...]",
+					version: "STRING (editor.js version)"
+				},
 				tags: "ARRAY [tag1, tag2, ...]"
 			}
 		});
@@ -262,7 +269,7 @@ router.post("/", verifyJWT, (req, res) => {
 	// check if an entry already exists for that day
 	Entries.findOne({
 		where: {
-			assignedDay: {
+			assigned_day: {
 				[Sequelize.Op.eq]: assignedDay
 			}
 		},
@@ -276,10 +283,10 @@ router.post("/", verifyJWT, (req, res) => {
 			}
 		
 			Entries.create({
-				assignedDay,
-				content: req.body.content,
+				assigned_day: assignedDay,
+				content: JSON.stringify(req.body.content),
 				tags: req.body.tags,
-				contentType: req.body.contentType,
+				sanitized_content: sanitize(req.body.content),
 			})
 				.then(newEntry => res.json(newEntry))
 				.catch(createError => logger.error(createError));
@@ -300,7 +307,7 @@ router.put("/", verifyJWT, (req, res) => {
 
 	Entries.findOne({
 		where: {
-			id: req.query.id
+			entry_id: req.query.id
 		}
 	})
 		.then(existingEntry => {
@@ -310,13 +317,16 @@ router.put("/", verifyJWT, (req, res) => {
 			}
 
 			const schema = Joi.object({
-				assignedDay: Joi.date().optional(),
-				content: Joi.string().optional(),
-				contentType: Joi.string().optional(),
+				assigned_day: Joi.date().optional(),
+				content: Joi.object({
+					time: Joi.number().required(),
+					blocks: Joi.array().required(),
+					version: Joi.string().required()
+				}).optional(),
 				tags: Joi.array().optional(),
 			});
 		
-			const { error, value } = schema.validate(req.body);
+			const { error } = schema.validate(req.body);
 		
 			if (error) {
 				res.status(400).json({ error });
@@ -324,12 +334,14 @@ router.put("/", verifyJWT, (req, res) => {
 			}
 
 			const queryConfig = {};
-			const { assignedDay, content, contentType, tags } = req.body;
+			const { assignedDay, content, tags } = req.body;
 
-			if (assignedDay) queryConfig.assignedDay = assignedDay;
-			if (content) 		 queryConfig.content 		 = content;
-			if (contentType) queryConfig.contentType = contentType;
-			if (tags)				 queryConfig.tags 			 = tags;
+			if (assignedDay) queryConfig.assigned_day = assignedDay;
+			if (tags)				 queryConfig.tags 			 	= tags;
+			if (content) {
+				queryConfig.content = content;
+				queryConfig.sanitized_content = sanitize(content);
+			}
 
 			existingEntry.update(queryConfig)
 				.then(updatedEntry => res.send(updatedEntry))
@@ -351,7 +363,7 @@ router.delete("/", verifyJWT, (req, res) => {
 	
 	Entries.findOne({
 		where: {
-			id: req.query.id
+			entry_id: req.query.id
 		}
 	})
 		.then(existingEntry => {
