@@ -27,7 +27,7 @@ const sanitize = content => {
 	 * (&\w[^\s;]*;) 	=> escaped html tags
 	 * ([,.()[\]{}]) 	=> "custom" characters to remove
 	 */
-	const SANI_REGEX = /(<([^>]+)>)|(&lt;.+?&gt;)|(&\w[^\s;]*;)|([,.()[\]{}])/gi;
+	const SANI_REGEX = /(<([^>]+)>)|(&lt;.+?&gt;)|(&\w[^\s;]*;)|([,.:()[\]{}])/gi;
 
 	const extractTextFromContent = jsonContent => {
 		/* filter out blocks that are either...
