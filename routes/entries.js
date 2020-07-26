@@ -2,7 +2,7 @@ const express = require("express");
 const moment = require("moment");
 const Sequelize = require("sequelize");
 const Joi = require("@hapi/joi");
-const verifyJWT = require("../config/jwt");
+const logger = require("node-color-log");
 const Entries = require("../models/entries");
 
 const router = express.Router();
@@ -35,7 +35,7 @@ router.get("/search", verifyJWT, (req, res) => {
 				records: entries.rows,
 			});
 		})
-		.catch(error => console.log(error));
+		.catch(error => logger.error(error));
 });
 
 
@@ -43,7 +43,7 @@ router.get("/search", verifyJWT, (req, res) => {
 router.get("/count", (req, res) => {
 	Entries.count()
 		.then(count => res.json({ all_records: count }))
-		.catch(error => console.log(error));
+		.catch(error => logger.error(error));
 });
 
 
@@ -95,7 +95,7 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 				res.status(500).json({
 					error: error.original.toString()
 				});
-				console.log(error);
+				logger.error(error);
 			});
 		return;
 	}
@@ -109,7 +109,7 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 			res.status(500).json({
 				error: error.original.toString()
 			});
-			console.log(error);
+			logger.error(error);
 		});
 });
 
@@ -123,14 +123,14 @@ router.get("/", verifyJWT, (req, res) => {
 			}
 		})
 			.then(entry => res.json(entry))
-			.catch(error => console.log(error));
+			.catch(error => logger.error(error));
 	} else {
 		Entries.findAndCountAll()
 			.then(entries => res.json({
 				count: entries.count,
 				entries: entries.rows
 			}))
-			.catch(error => console.log(error));
+			.catch(error => logger.error(error));
 	}
 });
 
@@ -164,7 +164,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 			count: entries.count,
 			entries: entries.rows
 		}))
-		.catch(error => console.log(error));
+		.catch(error => logger.error(error));
 });
 
 
@@ -198,7 +198,7 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 			count: entries.count,
 			entries: entries.rows
 		}))
-		.catch(error => console.log(error));
+		.catch(error => logger.error(error));
 });
 
 
@@ -218,7 +218,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 		},
 	})
 		.then(entry => res.json(entry))
-		.catch(error => console.log(error));
+		.catch(error => logger.error(error));
 });
 
 
@@ -281,7 +281,7 @@ router.post("/", verifyJWT, (req, res) => {
 				contentType: req.body.contentType,
 			})
 				.then(newEntry => res.json(newEntry))
-				.catch(createError => console.log(createError));
+				.catch(createError => logger.error(createError));
 		});
 });
 
@@ -332,7 +332,7 @@ router.put("/", verifyJWT, (req, res) => {
 
 			existingEntry.update(queryConfig)
 				.then(updatedEntry => res.send(updatedEntry))
-				.catch(updateError => console.log(updateError));
+				.catch(updateError => logger.error(updateError));
 		});
 });
 
@@ -361,7 +361,7 @@ router.delete("/", verifyJWT, (req, res) => {
 
 			existingEntry.destroy()
 				.then(deletedEntry => res.send(deletedEntry))
-				.catch(deleteError => console.log(deleteError));
+				.catch(deleteError => logger.error(deleteError));
 		});
 });
 

@@ -1759,6 +1759,11 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
+node-color-log@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/node-color-log/-/node-color-log-4.0.0.tgz#ecdbf46af8caa4e6f166649ba3896868ad2de00a"
+  integrity sha512-vhKj2BDY1POT45QkFbOyeR5IceJxswR9BW1Ws5CMHBaF9WwpTzSV7Xho3APx9TikvAXE1TS6PBjZoOe5DvbAgg==
+
 node-pre-gyp@0.13.0:
   version "0.13.0"
   resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.13.0.tgz#df9ab7b68dd6498137717838e4f92a33fc9daa42"

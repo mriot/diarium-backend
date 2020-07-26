@@ -1,23 +1,24 @@
-console.clear();
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const moment = require("moment");
+const logger = require("node-color-log");
 const db = require("./config/database");
 
 const port = process.env.PORT || 5000;
 const app = express();
 
+console.clear();
+
 // Test database connection
 db.authenticate()
-	.then(console.log("Connection to the database has been established successfully!"))
-	.catch(err => console.error("Unable to connect to the database:", err));
+	.then(logger.info("Connection to the database has been established successfully!"))
+	.catch(err => logger.error("Unable to connect to the database:", err));
 
 // Middleware
 app.use((req, res, next) => {
-	console.log("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖");
-	console.log(`\n📨 ${req.method} ${req.url} • ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
+	logger.log("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖");
+	logger.color("cyan").bold().log(`\n📨 ${req.method} ${req.url} • ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
 
 	// console.log("▶ HEADERS:\n", req.headers);
 	// console.log("▶ PARAMS:\n", req.params);
@@ -42,5 +43,4 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/entries", require("./routes/entries"));
 app.use("/api/jwt", require("./routes/jwt-info"));
 
-
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => logger.info(`Server running on port ${port}`));
