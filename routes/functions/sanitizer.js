@@ -9,8 +9,12 @@ const logger = require("node-color-log");
  */
 
 const sanitize = content => {
+	if (!content.blocks) {
+		logger.warn("Sanitizer received malformed JSON!");
+		return "";
+	}
 	if (content.blocks.length === 0) {
-		logger.warn("> Received 0 blocks to sanitize!");
+		logger.warn("Sanitizer received 0 blocks to sanitize!");
 		return "";
 	}
 
@@ -64,7 +68,7 @@ const sanitize = content => {
 
 	const END = performance.now();
 
-	logger.info(`> Sanitizing ${content.blocks.length} blocks took ${(END - START).toFixed(2)} ms`);
+	logger.info(`Sanitizing ${content.blocks.length} blocks took ${(END - START).toFixed(2)} ms`);
 
 	return sanitizedContent;
 };
