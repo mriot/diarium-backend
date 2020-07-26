@@ -3,6 +3,7 @@ const moment = require("moment");
 const Sequelize = require("sequelize");
 const Joi = require("@hapi/joi");
 const logger = require("node-color-log");
+const verifyJWT = require("../middleware/jwt");
 const Entries = require("../models/entries");
 
 const router = express.Router();
