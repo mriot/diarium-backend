@@ -36,6 +36,6 @@ const Entry = db.define("entry", {
  * creates the table
  * - CAUTION - setting force to true, will drop the existing table first!
  */
-Entry.sync({ force: true });
+Entry.sync({ force: false });
 
 module.exports = Entry;
