@@ -23,6 +23,6 @@ const User = db.define("user", {
  * creates the table
  * - CAUTION - setting force to true, will drop the existing table first!
  */
-User.sync({ force: true });
+User.sync({ force: false });
 
 module.exports = User;
