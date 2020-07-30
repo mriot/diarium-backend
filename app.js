@@ -40,6 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/register", require("./routes/register"));
 app.use("/api/entries", require("./routes/entries"));
 app.use("/api/jwt", require("./routes/jwt-info"));
 
