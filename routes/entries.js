@@ -1,8 +1,10 @@
+const HttpStatus = require("http-status-codes");
 const express = require("express");
 const moment = require("moment");
 const Sequelize = require("sequelize");
 const Joi = require("@hapi/joi");
 const logger = require("node-color-log");
+const string = require("@hapi/joi/lib/types/string");
 const verifyJWT = require("../middleware/jwt");
 const Entries = require("../models/entries");
 const sanitize = require("./functions/sanitizer");
@@ -16,7 +18,7 @@ const router = express.Router();
 // SEARCH
 router.get("/search", verifyJWT, (req, res) => {
 	if (!req.query.q) {
-		res.status(400).json({ error: "No query specified" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: "No query specified" });
 		return;
 	}
 
@@ -56,14 +58,14 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 	const endDate = moment(end, "YYYY-MM-DD", true);
 
 	if (count && count !== "count") {
-		res.status(400).json({
+		res.status(HttpStatus.BAD_REQUEST).json({
 			error: `Invalid path '/range/${count}/' — Try instead '/range/count/'`,
 		});
 		return;
 	}
 
 	if (!startDate.isValid() || !endDate.isValid()) {
-		res.status(400).json({
+		res.status(HttpStatus.BAD_REQUEST).json({
 			error: "Parameters 'start' and 'end' are required and have to be a valid date (YYYY-MM-DD)",
 		});
 		return;
@@ -94,7 +96,7 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 				records_in_range: countValue
 			}))
 			.catch(error => {
-				res.status(500).json({
+				res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
 					error: error.original.toString()
 				});
 				logger.error(error);
@@ -108,7 +110,7 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
 			entries: entries.rows
 		}))
 		.catch(error => {
-			res.status(500).json({
+			res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
 				error: error.original.toString()
 			});
 			logger.error(error);
@@ -142,7 +144,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 	const parsedDate = moment(req.params.year, "YYYY", true);
 
 	if (!parsedDate.isValid()) {
-		res.status(400).json({ error: parsedDate.toString(), required_format: "YYYY" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY" });
 		return;
 	}
 
@@ -176,7 +178,7 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 	const parsedDate = moment(`${year}-${month}`, "YYYY-MM", true);
 
 	if (!parsedDate.isValid()) {
-		res.status(400).json({ error: parsedDate.toString(), required_format: "YYYY-MM" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY-MM" });
 		return;
 	}
 
@@ -210,7 +212,7 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 	const parsedDate = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
 
 	if (!parsedDate.isValid()) {
-		res.status(400).json({ error: parsedDate.toString(), required_format: "YYYY-MM-DD" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY-MM-DD" });
 		return;
 	}
 
@@ -234,7 +236,7 @@ router.post("/", verifyJWT, (req, res) => {
 
 	// strictly check if date matches our format
 	if (!assignedDay.isValid()) {
-		res.status(400).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
 		return;
 	}
 
@@ -248,10 +250,10 @@ router.post("/", verifyJWT, (req, res) => {
 		tags: Joi.array().required(),
 	});
 
-	const { error } = schema.validate(req.body);
+	const { error } = schema.validate(REQUEST_BODY_JSON);
 
 	if (error) {
-		res.status(400).json({
+		res.status(HttpStatus.BAD_REQUEST).json({
 			error: "The data has to match the schema below.",
 			schema: {
 				assigned_day: "DATE (YYYY-MM-DD)",
@@ -276,7 +278,7 @@ router.post("/", verifyJWT, (req, res) => {
 	})
 		.then(existingEntry => {
 			if (existingEntry) {
-				res.status(409).json({
+				res.status(HttpStatus.CONFLICT).json({
 					error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists!`
 				});
 				return;
@@ -301,7 +303,7 @@ router.post("/", verifyJWT, (req, res) => {
 // UPDATE SINGLE ENTRY
 router.put("/", verifyJWT, (req, res) => {
 	if (!req.query.id) {
-		res.status(400).json({ error: "No ID specified" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: "No ID specified" });
 		return;
 	}
 
@@ -312,7 +314,7 @@ router.put("/", verifyJWT, (req, res) => {
 	})
 		.then(existingEntry => {
 			if (!existingEntry) {
-				res.status(404).json({ error: `Entry for ID ${req.query.id} not found` });
+				res.status(HttpStatus.NOT_FOUND).json({ error: `Entry for ID ${req.query.id} not found` });
 				return;
 			}
 
@@ -329,7 +331,7 @@ router.put("/", verifyJWT, (req, res) => {
 			const { error } = schema.validate(req.body);
 		
 			if (error) {
-				res.status(400).json({ error });
+				res.status(HttpStatus.BAD_REQUEST).json({ error });
 				return;
 			}
 
@@ -363,7 +365,7 @@ router.put("/", verifyJWT, (req, res) => {
 // DELETE SINGLE ENTRY
 router.delete("/", verifyJWT, (req, res) => {
 	if (!req.query.id) {
-		res.status(400).json({ error: "No ID specified" });
+		res.status(HttpStatus.BAD_REQUEST).json({ error: "No ID specified" });
 		return;
 	}
 	
@@ -374,7 +376,7 @@ router.delete("/", verifyJWT, (req, res) => {
 	})
 		.then(existingEntry => {
 			if (!existingEntry) {
-				res.status(404).json({ error: `Entry for ID ${req.query.id} not found` });
+				res.status(HttpStatus.NOT_FOUND).json({ error: `Entry for ID ${req.query.id} not found` });
 				return;
 			}
 

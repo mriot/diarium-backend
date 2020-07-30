@@ -2,6 +2,7 @@ const express = require("express");
 const moment = require("moment");
 const Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
+const HttpStatus = require("http-status-codes");
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.post("/", (req, res) => {
 	const { error, value } = schema.validate(req.body);
 
 	if (error) {
-		res.status(400).json({ error });
+		res.status(HttpStatus.BAD_REQUEST).json({ error });
 		return;
 	}
 
