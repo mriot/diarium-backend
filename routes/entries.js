@@ -232,20 +232,16 @@ router.get("/:year/:month/:day", verifyJWT, (req, res) => {
 
 // CREATE SINGLE ENTRY
 router.post("/", verifyJWT, (req, res) => {
-	const assignedDay = moment(req.body.assigned_day, "YYYY-MM-DD", true);
+	// JSON.parse is done by json-middleware in app.js
+	const REQUEST_BODY_JSON = req.body;
 
-	// strictly check if date matches our format
-	if (!assignedDay.isValid()) {
-		res.status(HttpStatus.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
-		return;
-	}
-
+	// validate content
 	const schema = Joi.object({
 		assigned_day: Joi.date().required(),
 		content: Joi.object({
 			time: Joi.number().required(),
 			blocks: Joi.array().required(),
-			version: Joi.string().required()
+			version: Joi.string().optional()
 		}).required(),
 		tags: Joi.array().required(),
 	});
@@ -254,17 +250,24 @@ router.post("/", verifyJWT, (req, res) => {
 
 	if (error) {
 		res.status(HttpStatus.BAD_REQUEST).json({
-			error: "The data has to match the schema below.",
-			schema: {
+			error: "The data is not matching the required schema.",
+			required_schema: {
 				assigned_day: "DATE (YYYY-MM-DD)",
 				content: {
 					time: "NUMBER (unix timestamp)",
 					blocks: "ARRAY [{}, {}, ...]",
-					version: "STRING (editor.js version)"
+					version: "OPTIONAL - STRING (Editor.js version)"
 				},
-				tags: "ARRAY [tag1, tag2, ...]"
+				tags: "ARRAY ['tag1', 'tag2', ...]"
 			}
 		});
+		return;
+	}
+
+	// strictly check if date matches the required format
+	const assignedDay = moment(REQUEST_BODY_JSON.assigned_day, "YYYY-MM-DD", true);
+	if (!assignedDay.isValid()) {
+		res.status(HttpStatus.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
 		return;
 	}
 
@@ -286,9 +289,9 @@ router.post("/", verifyJWT, (req, res) => {
 		
 			Entries.create({
 				assigned_day: assignedDay,
-				content: JSON.stringify(req.body.content),
-				tags: req.body.tags,
-				sanitized_content: sanitize(req.body.content),
+				content: JSON.stringify(REQUEST_BODY_JSON.content),
+				tags: REQUEST_BODY_JSON.tags,
+				sanitized_content: sanitize(REQUEST_BODY_JSON.content),
 			})
 				.then(newEntry => res.json(newEntry))
 				.catch(createError => logger.error(createError));
@@ -323,7 +326,7 @@ router.put("/", verifyJWT, (req, res) => {
 				content: Joi.object({
 					time: Joi.number().required(),
 					blocks: Joi.array().required(),
-					version: Joi.string().required()
+					version: Joi.string().optional()
 				}).optional(),
 				tags: Joi.array().optional(),
 			});
