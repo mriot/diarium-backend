@@ -29,6 +29,9 @@ const Entry = db.define("entry", {
 		set(value) {
 			return this.setDataValue("tags", JSON.stringify(value));
 		}
+	},
+	day_rating: {
+		type: Sequelize.INTEGER
 	}
 }, options);
 
