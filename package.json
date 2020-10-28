@@ -16,6 +16,7 @@
     "moment": "^2.24.0",
     "node-color-log": "^4.0.0",
     "sequelize": "^5.21.3",
+    "slate": "^0.59.0",
     "sqlite3": "^5.0.0"
   },
   "devDependencies": {
@@ -23,6 +24,6 @@
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.19.1",
-    "nodemon": "^2.0.5"
+    "nodemon": "^2.0.6"
   }
 }
