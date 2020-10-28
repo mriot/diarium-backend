@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const moment = require("moment");
+const dayjs = require("dayjs");
 const logger = require("node-color-log");
 const db = require("./config/database");
 
@@ -18,7 +18,7 @@ db.authenticate()
 // Middleware
 app.use((req, res, next) => {
 	logger.log("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖");
-	logger.color("cyan").bold().log(`\n📨 ${req.method} ${req.url} • ${moment().format("YYYY-MM-DD HH:mm:ss")}`);
+	logger.color("cyan").bold().log(`\n📨 ${req.method} ${req.url} • ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`);
 
 	// console.log("▶ HEADERS:\n", req.headers);
 	// console.log("▶ PARAMS:\n", req.params);
