@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const dayjs = require("dayjs");
 const logger = require("node-color-log");
+const chalk = require("chalk");
 const db = require("./config/database");
 
 const port = process.env.PORT || 5000;
@@ -10,27 +11,35 @@ const app = express();
 
 console.clear();
 
-// Test database connection
+// establish connection to database
 db.authenticate()
 	.then(logger.info("Connection to the database has been established successfully!"))
 	.catch(err => logger.error("Unable to connect to the database:", err));
 
-// Middleware
+// General request logging
 app.use((req, res, next) => {
-	logger.log("➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖");
-	logger.color("cyan").bold().log(`\n📨 ${req.method} ${req.url} • ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`);
-
-	// console.log("▶ HEADERS:\n", req.headers);
-	// console.log("▶ PARAMS:\n", req.params);
-	// console.log("▶ QUERY:\n", req.query);
-	// console.log("▶ BODY:\n", req.body);
-
-	// console.log(req.headers);
-	// console.log(req.body);
-	// console.log(req.method);
-	// console.log(req.url);
-	// console.log(req.params);
-	// console.log(req.query);
+	if (req.method !== "OPTIONS") {
+		console.log(
+			"\n📨 IP:",
+			chalk.bgMagenta(req.ip),
+			"•",
+			dayjs().format("YYYY-MM-DD HH:mm:ss"),
+			"•",
+			chalk.bgCyan(req.method), req.url
+		);
+	
+		// console.log("▶ HEADERS:\n", req.headers);
+		// console.log("▶ PARAMS:\n", req.params);
+		// console.log("▶ QUERY:\n", req.query);
+		// console.log("▶ BODY:\n", req.body);
+	
+		// console.log(req.headers);
+		// console.log(req.body);
+		// console.log(req.method);
+		// console.log(req.url);
+		// console.log(req.params);
+		// console.log(req.query);
+	}
 
 	next();
 });
