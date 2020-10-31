@@ -49,8 +49,7 @@ app.use(express.json()); // http://expressjs.com/en/4x/api.html#express.json
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/register", require("./routes/register"));
+app.use("/api/user", require("./routes/user"));
 app.use("/api/entries", require("./routes/entries"));
 app.use("/api/jwt", require("./routes/jwt-info"));
 app.use((req, res, next) => {
