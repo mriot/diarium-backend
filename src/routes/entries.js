@@ -7,7 +7,7 @@ const logger = require("node-color-log");
 const string = require("@hapi/joi/lib/types/string");
 const verifyJWT = require("../middleware/jwt");
 const Entries = require("../models/entries");
-const sanitize = require("./functions/sanitizer");
+const sanitize = require("./_functions/sanitizer");
 
 const router = express.Router();
 
