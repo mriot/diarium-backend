@@ -5,6 +5,7 @@ const dayjs = require("dayjs");
 const logger = require("node-color-log");
 const chalk = require("chalk");
 const db = require("./config/database");
+const { StatusCodes } = require("http-status-codes");
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -52,5 +53,9 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/register", require("./routes/register"));
 app.use("/api/entries", require("./routes/entries"));
 app.use("/api/jwt", require("./routes/jwt-info"));
+app.use((req, res, next) => {
+  console.log(chalk.bgRed(StatusCodes.NOT_FOUND));
+  res.status(StatusCodes.NOT_FOUND).json({ error: `Could not find endpoint ${req.url}` });
+});
 
 app.listen(port, () => logger.info(`Server running on port ${port}`));
