@@ -13,35 +13,35 @@ console.clear();
 
 // establish connection to database
 db.authenticate()
-	.then(logger.info("Connection to the database has been established successfully!"))
-	.catch(err => logger.error("Unable to connect to the database:", err));
+  .then(logger.info("Connection to the database has been established successfully!"))
+  .catch(err => logger.error("Unable to connect to the database:", err));
 
 // General request logging
 app.use((req, res, next) => {
-	if (req.method !== "OPTIONS") {
-		console.log(
-			"\n📨 IP:",
-			chalk.bgMagenta(req.ip),
-			"•",
-			dayjs().format("YYYY-MM-DD HH:mm:ss"),
-			"•",
-			chalk.bgCyan(req.method), req.url
-		);
-	
-		// console.log("▶ HEADERS:\n", req.headers);
-		// console.log("▶ PARAMS:\n", req.params);
-		// console.log("▶ QUERY:\n", req.query);
-		// console.log("▶ BODY:\n", req.body);
-	
-		// console.log(req.headers);
-		// console.log(req.body);
-		// console.log(req.method);
-		// console.log(req.url);
-		// console.log(req.params);
-		// console.log(req.query);
-	}
+  if (req.method !== "OPTIONS") {
+    console.log(
+      "\n📨 IP:",
+      chalk.bgMagenta(req.ip),
+      "•",
+      dayjs().format("YYYY-MM-DD HH:mm:ss"),
+      "•",
+      chalk.bgCyan(req.method), req.url
+    );
 
-	next();
+    // console.log("▶ HEADERS:\n", req.headers);
+    // console.log("▶ PARAMS:\n", req.params);
+    // console.log("▶ QUERY:\n", req.query);
+    // console.log("▶ BODY:\n", req.body);
+
+    // console.log(req.headers);
+    // console.log(req.body);
+    // console.log(req.method);
+    // console.log(req.url);
+    // console.log(req.params);
+    // console.log(req.query);
+  }
+
+  next();
 });
 app.use(cors());
 app.use(express.json()); // http://expressjs.com/en/4x/api.html#express.json
