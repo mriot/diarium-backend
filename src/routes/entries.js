@@ -315,11 +315,7 @@ router.put("/", verifyJWT, (req, res) => {
 
       const schema = Joi.object({
         assigned_day: Joi.date().optional(),
-        content: Joi.object({
-          time: Joi.number().required(),
-          blocks: Joi.array().required(),
-          version: Joi.string().optional()
-        }).optional(),
+        content: Joi.string().optional(),
         tags: Joi.array().optional()
       });
 
@@ -341,7 +337,7 @@ router.put("/", verifyJWT, (req, res) => {
         queryConfig.tags = tags;
       }
       if (content) {
-        queryConfig.content = JSON.stringify(content);
+        queryConfig.content = content;
         queryConfig.sanitized_content = sanitize(content);
         console.log(content);
       }
