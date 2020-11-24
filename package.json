@@ -16,6 +16,8 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
     "node-color-log": "^5.2.0",
+    "node-html-parser": "^2.0.0",
+    "sanitize-html": "^2.1.2",
     "sequelize": "^6.3.5",
     "slate": "^0.59.0",
     "sqlite3": "^5.0.0"
