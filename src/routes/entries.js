@@ -337,9 +337,10 @@ router.put("/", verifyJWT, (req, res) => {
         queryConfig.tags = tags;
       }
       if (content) {
-        queryConfig.content = content;
-        queryConfig.sanitized_content = sanitize(content);
-        console.log(content);
+        const [cleanHTML, cleanText] = sanitize(content);
+        queryConfig.content = cleanHTML;
+        queryConfig.sanitized_content = cleanText;
+        // console.log(content);
       }
 
       existingEntry.update(queryConfig)
