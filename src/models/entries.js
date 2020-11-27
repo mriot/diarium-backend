@@ -13,11 +13,11 @@ const Entry = db.define("entry", {
     allowNull: false,
     unique: true
   },
-  content: { // JSON
+  content: {
     type: Sequelize.TEXT,
     allowNull: false
   },
-  sanitized_content: { // text extracted from JSON to make it easily searchable
+  content_text: {
     type: Sequelize.TEXT,
     allowNull: false
   },
