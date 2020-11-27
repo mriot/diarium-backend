@@ -40,11 +40,12 @@ const sanitize = content => {
 
       if (node.nodeName === "#text") {
         if (node.nextSibling) {
-          node.textContent = node.textContent + " ";
+          node.textContent += " ";
         }
       }
     });
 
+    // todo: only sanitize purified content?
     cleanText = DOMPurify.sanitize(content, {
       ALLOWED_TAGS: ["#text"],
       KEEP_CONTENT: true
