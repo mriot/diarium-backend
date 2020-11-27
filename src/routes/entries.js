@@ -26,7 +26,7 @@ router.get("/search", verifyJWT, (req, res) => {
 
   Entries.findAndCountAll({
     where: {
-      sanitized_content: {
+      content_text: {
         [Sequelize.Op.and]: queryArray.map(queryItem => ({
           [Sequelize.Op.like]: `%${queryItem}%`
         }))
@@ -339,8 +339,7 @@ router.put("/", verifyJWT, (req, res) => {
       if (content) {
         const [cleanHTML, cleanText] = sanitize(content);
         queryConfig.content = cleanHTML;
-        queryConfig.sanitized_content = cleanText;
-        // console.log(content);
+        queryConfig.content_text = cleanText;
       }
 
       existingEntry.update(queryConfig)
