@@ -231,11 +231,7 @@ router.post("/", verifyJWT, (req, res) => {
   // validate content
   const schema = Joi.object({
     assigned_day: Joi.date().required(),
-    content: Joi.object({
-      time: Joi.number().required(),
-      blocks: Joi.array().required(),
-      version: Joi.string().optional()
-    }).required(),
+    content: Joi.string().required(),
     tags: Joi.array().required()
   });
 
@@ -246,11 +242,7 @@ router.post("/", verifyJWT, (req, res) => {
       error: "The data is not matching the required schema.",
       required_schema: {
         assigned_day: "DATE (YYYY-MM-DD)",
-        content: {
-          time: "NUMBER (unix timestamp)",
-          blocks: "ARRAY [{}, {}, ...]",
-          version: "OPTIONAL - STRING (Editor.js version)"
-        },
+        content: "HTML",
         tags: "ARRAY ['tag1', 'tag2', ...]"
       }
     });
@@ -280,11 +272,13 @@ router.post("/", verifyJWT, (req, res) => {
         return;
       }
 
+      const [cleanHTML, cleanText] = sanitize(REQUEST_BODY_JSON.content);
+
       Entries.create({
         assigned_day: assignedDay,
-        content: JSON.stringify(REQUEST_BODY_JSON.content),
-        tags: REQUEST_BODY_JSON.tags,
-        sanitized_content: sanitize(REQUEST_BODY_JSON.content)
+        content: cleanHTML,
+        content_text: cleanText,
+        tags: REQUEST_BODY_JSON.tags
       })
         .then(newEntry => res.json(newEntry))
         .catch(createError => logger.error(createError));
