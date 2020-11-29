@@ -25,6 +25,28 @@ const sanitize = content => {
   const DOMPurify = createDOMPurify(window);
 
   try {
+    DOMPurify.addHook("beforeSanitizeElements", (node) => {
+      if (node.nodeType === 3) {
+        // console.log(/\s/.test(node.nodeValue));
+        const parentNodeName = node.parentNode.nodeName;
+        if (
+          parentNodeName === "TABLE" ||
+          parentNodeName === "THEAD" ||
+          parentNodeName === "TBODY" ||
+          parentNodeName === "TFOOT" ||
+          parentNodeName === "TR"
+        ) {
+          // console.log("before", node.parentNode.childNodes.length);
+          // node.parentNode.normalize();
+          node.parentNode.removeChild(node);
+          // console.log("normalized", parentNodeName);
+          // node.textContent = node.textContent.trim();
+          // node.parentNode.normalize();
+          // console.log("after", node.parentNode.childNodes.length);
+        }
+      }
+    });
+
     cleanHTML = DOMPurify.sanitize(content);
   } catch (error) {
     console.log(chalk.red(error));
