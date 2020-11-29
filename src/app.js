@@ -45,7 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors());
-app.use(express.json()); // http://expressjs.com/en/4x/api.html#express.json
+app.use(express.json({ limit: "500kb" })); // http://expressjs.com/en/4x/api.html#express.json
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
