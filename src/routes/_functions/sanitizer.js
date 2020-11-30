@@ -13,74 +13,47 @@ const chalk = require("chalk");
 const sanitize = content => {
   if (!content) {
     console.log(chalk.yellow("Sanitizer received no markup!"));
-    return "";
+    return ["", ""];
   }
 
   const START = performance.now();
+  let SANITIZED_HTML_STRING = "";
+  const CONTENT_ARRAY = [];
+  const DOMPurify = createDOMPurify(new JSDOM("").window);
 
-  let cleanHTML = "";
-  let cleanText = "";
+  DOMPurify.addHook("beforeSanitizeElements", (node) => {
+    if (node.nodeName === "A") {
+      CONTENT_ARRAY.push(node.getAttribute("href"));
+    }
 
-  const window = new JSDOM("").window;
-  const DOMPurify = createDOMPurify(window);
+    if (node.nodeName === "IMG") {
+      CONTENT_ARRAY.push(node.getAttribute("alt"));
+    }
 
-  try {
-    DOMPurify.addHook("beforeSanitizeElements", (node) => {
-      if (node.nodeType === 3) {
-        // console.log(/\s/.test(node.nodeValue));
-        const parentNodeName = node.parentNode.nodeName;
-        if (
-          parentNodeName === "TABLE" ||
-          parentNodeName === "THEAD" ||
-          parentNodeName === "TBODY" ||
-          parentNodeName === "TFOOT" ||
-          parentNodeName === "TR"
-        ) {
-          // console.log("before", node.parentNode.childNodes.length);
-          // node.parentNode.normalize();
-          node.parentNode.removeChild(node);
-          // console.log("normalized", parentNodeName);
-          // node.textContent = node.textContent.trim();
-          // node.parentNode.normalize();
-          // console.log("after", node.parentNode.childNodes.length);
-        }
+    // clear bad whitespaces in tables
+    if (node.nodeType === 3) {
+      const parentNode = node.parentNode;
+      if (
+        parentNode.nodeName === "TABLE" ||
+        parentNode.nodeName === "THEAD" ||
+        parentNode.nodeName === "TBODY" ||
+        parentNode.nodeName === "TFOOT" ||
+        parentNode.nodeName === "TR"
+      ) {
+        parentNode.removeChild(node);
       }
-    });
+    }
+  });
 
-    cleanHTML = DOMPurify.sanitize(content);
-  } catch (error) {
-    console.log(chalk.red(error));
-  }
-
-  try {
-    DOMPurify.addHook("beforeSanitizeElements", (node) => {
-      if (!node.nodeName) return;
-
-      if (node.nodeName === "A") {
-        node.textContent = `${node.textContent} [${node.getAttribute("href")}]`;
-      }
-
-      if (node.nodeName === "#text") {
-        if (node.nextSibling) {
-          node.textContent += " ";
-        }
-      }
-    });
-
-    // todo: only sanitize purified content?
-    cleanText = DOMPurify.sanitize(content, {
-      ALLOWED_TAGS: ["#text"],
-      KEEP_CONTENT: true
-    });
-  } catch (error) {
-    console.log(chalk.red(error));
-  }
+  SANITIZED_HTML_STRING = DOMPurify.sanitize(content);
+  const sanitizedHTMLDOM = new JSDOM(SANITIZED_HTML_STRING).window;
+  CONTENT_ARRAY.push(sanitizedHTMLDOM.document.documentElement.textContent);
 
   const END = performance.now();
 
   console.log(chalk.cyan(`Sanitizing content took ${(END - START).toFixed(2)} ms`));
 
-  return [cleanHTML, cleanText];
+  return [SANITIZED_HTML_STRING, CONTENT_ARRAY.join(" ").replace(/\s+/g, " ").trim()];
 };
 
 module.exports = sanitize;
