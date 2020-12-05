@@ -308,9 +308,9 @@ router.put("/", verifyJWT, (req, res) => {
       }
 
       const schema = Joi.object({
-        assigned_day: Joi.date().optional(),
         content: Joi.string().optional(),
-        tags: Joi.array().optional()
+        tags: Joi.array().optional(),
+        rating: Joi.number().optional()
       });
 
       const { error } = schema.validate(req.body);
@@ -322,10 +322,10 @@ router.put("/", verifyJWT, (req, res) => {
 
       // determine what to update
       const queryConfig = {};
-      const { assignedDay, content, tags } = req.body;
+      const { rating, content, tags } = req.body;
 
-      if (assignedDay) {
-        queryConfig.assigned_day = assignedDay;
+      if (typeof rating !== "undefined") {
+        queryConfig.day_rating = rating;
       }
       if (tags) {
         queryConfig.tags = tags;
