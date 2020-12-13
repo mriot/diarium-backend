@@ -201,22 +201,32 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 });
 
 // GET SINGLE ENTRY (matching year/month/day)
-router.get("/:year/:month/:day", verifyJWT, (req, res) => {
+router.get("/:year/:month/:day", async (req, res) => {
   const { year, month, day } = req.params;
   const parsedDate = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
 
   if (!parsedDate.isValid()) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY-MM-DD" });
+    res.status(StatusCodes.BAD_REQUEST).json({
+      error: parsedDate.toString(), required_format: "YYYY-MM-DD"
+    });
     return;
   }
 
-  Entries.findOne({
-    where: {
-      assigned_day: parsedDate.format()
-    }
-  })
-    .then(entry => res.json(entry))
-    .catch(error => logger.error(error));
+  try {
+    const result = await Entries.findOne({
+      where: {
+        assigned_day: parsedDate.format()
+      }
+    });
+
+    res.json(result || {});
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: "Internal Server Error",
+      message: "Could not query database"
+    });
+  }
 });
 
 /**
