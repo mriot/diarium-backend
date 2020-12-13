@@ -1,4 +1,4 @@
-const HttpStatus = require("http-status-codes");
+const { StatusCodes } = require("http-status-codes");
 const express = require("express");
 const moment = require("moment");
 const Sequelize = require("sequelize");
@@ -18,7 +18,7 @@ const router = express.Router();
 // SEARCH
 router.get("/search", verifyJWT, (req, res) => {
   if (!req.query.q) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: "No query specified" });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: "No query specified" });
     return;
   }
 
@@ -56,14 +56,14 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
   const endDate = moment(end, "YYYY-MM-DD", true);
 
   if (count && count !== "count") {
-    res.status(HttpStatus.BAD_REQUEST).json({
+    res.status(StatusCodes.BAD_REQUEST).json({
       error: `Invalid path '/range/${count}/' — Try instead '/range/count/'`
     });
     return;
   }
 
   if (!startDate.isValid() || !endDate.isValid()) {
-    res.status(HttpStatus.BAD_REQUEST).json({
+    res.status(StatusCodes.BAD_REQUEST).json({
       error: "Parameters 'start' and 'end' are required and have to be a valid date (YYYY-MM-DD)"
     });
     return;
@@ -94,7 +94,7 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
         records_in_range: countValue
       }))
       .catch(error => {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           error: error.original.toString()
         });
         logger.error(error);
@@ -108,7 +108,7 @@ router.get("/range/:count?", verifyJWT, (req, res) => {
       entries: entries.rows
     }))
     .catch(error => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: error.original.toString()
       });
       logger.error(error);
@@ -140,7 +140,7 @@ router.get("/:year", verifyJWT, (req, res) => {
   const parsedDate = moment(req.params.year, "YYYY", true);
 
   if (!parsedDate.isValid()) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY" });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY" });
     return;
   }
 
@@ -173,7 +173,7 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
   const parsedDate = moment(`${year}-${month}`, "YYYY-MM", true);
 
   if (!parsedDate.isValid()) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY-MM" });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY-MM" });
     return;
   }
 
@@ -248,7 +248,7 @@ router.post("/", verifyJWT, (req, res) => {
   const { error } = schema.validate(REQUEST_BODY_JSON);
 
   if (error) {
-    res.status(HttpStatus.BAD_REQUEST).json({
+    res.status(StatusCodes.BAD_REQUEST).json({
       error: "The data is not matching the required schema.",
       required_schema: {
         assigned_day: "DATE (YYYY-MM-DD)",
@@ -262,7 +262,7 @@ router.post("/", verifyJWT, (req, res) => {
   // strictly check if date matches the required format
   const assignedDay = moment(REQUEST_BODY_JSON.assigned_day, "YYYY-MM-DD", true);
   if (!assignedDay.isValid()) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
     return;
   }
 
@@ -276,7 +276,7 @@ router.post("/", verifyJWT, (req, res) => {
   })
     .then(existingEntry => {
       if (existingEntry) {
-        res.status(HttpStatus.CONFLICT).json({
+        res.status(StatusCodes.CONFLICT).json({
           error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists!`
         });
         return;
@@ -302,7 +302,7 @@ router.post("/", verifyJWT, (req, res) => {
 // UPDATE SINGLE ENTRY
 router.put("/", verifyJWT, (req, res) => {
   if (!req.query.id) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: "No ID specified" });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: "No ID specified" });
     return;
   }
 
@@ -313,7 +313,7 @@ router.put("/", verifyJWT, (req, res) => {
   })
     .then(existingEntry => {
       if (!existingEntry) {
-        res.status(HttpStatus.NOT_FOUND).json({ error: `Entry for ID ${req.query.id} not found` });
+        res.status(StatusCodes.NOT_FOUND).json({ error: `Entry for ID ${req.query.id} not found` });
         return;
       }
 
@@ -326,7 +326,7 @@ router.put("/", verifyJWT, (req, res) => {
       const { error } = schema.validate(req.body);
 
       if (error) {
-        res.status(HttpStatus.BAD_REQUEST).json({ error });
+        res.status(StatusCodes.BAD_REQUEST).json({ error });
         return;
       }
 
@@ -359,7 +359,7 @@ router.put("/", verifyJWT, (req, res) => {
 // DELETE SINGLE ENTRY
 router.delete("/", verifyJWT, (req, res) => {
   if (!req.query.id) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error: "No ID specified" });
+    res.status(StatusCodes.BAD_REQUEST).json({ error: "No ID specified" });
     return;
   }
 
@@ -370,7 +370,7 @@ router.delete("/", verifyJWT, (req, res) => {
   })
     .then(existingEntry => {
       if (!existingEntry) {
-        res.status(HttpStatus.NOT_FOUND).json({ error: `Entry for ID ${req.query.id} not found` });
+        res.status(StatusCodes.NOT_FOUND).json({ error: `Entry for ID ${req.query.id} not found` });
         return;
       }
 
