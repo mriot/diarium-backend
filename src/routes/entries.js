@@ -232,7 +232,10 @@ router.post("/", verifyJWT, (req, res) => {
   // strictly check if date matches the required format
   const assignedDay = dayjs(REQUEST_BODY_JSON.assigned_day, "YYYY-MM-DD", true);
   if (!assignedDay.isValid()) {
-    res.status(StatusCodes.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
+    res.status(StatusCodes.BAD_REQUEST).json({
+      error: assignedDay.toString(),
+      required_format: "YYYY-MM-DD"
+    });
     return;
   }
 
@@ -240,14 +243,15 @@ router.post("/", verifyJWT, (req, res) => {
   Entries.findOne({
     where: {
       assigned_day: {
-        [Sequelize.Op.eq]: assignedDay
+        [Sequelize.Op.eq]: assignedDay.format()
       }
     }
   })
     .then(existingEntry => {
       if (existingEntry) {
         res.status(StatusCodes.CONFLICT).json({
-          error: `Entry for ${dayjs(assignedDay).format("YYYY-MM-DD")} already exists!`
+          error: `Entry for ${assignedDay.format("YYYY-MM-DD")} already exists!`,
+          existingEntry
         });
         return;
       }
@@ -255,7 +259,7 @@ router.post("/", verifyJWT, (req, res) => {
       const [cleanHTML, cleanText] = sanitize(REQUEST_BODY_JSON.content);
 
       Entries.create({
-        assigned_day: assignedDay,
+        assigned_day: assignedDay.format(),
         content: cleanHTML,
         content_text: cleanText,
         tags: REQUEST_BODY_JSON.tags
