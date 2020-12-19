@@ -1,59 +1,29 @@
 const { StatusCodes } = require("http-status-codes");
 const express = require("express");
-const moment = require("moment");
 const Sequelize = require("sequelize");
 const Joi = require("@hapi/joi");
 const logger = require("node-color-log");
-const string = require("@hapi/joi/lib/types/string");
 const verifyJWT = require("../middleware/jwt");
 const Entries = require("../models/entries");
 const sanitize = require("./_functions/sanitizer");
+const dayjs = require("dayjs");
+
+const count = require("./entries/count");
+const search = require("./entries/search");
 
 const router = express.Router();
 
 /**
- * =============== [ GET - REQUESTS ] ===============
+ * ============================== GET ==============================
  */
-
-// SEARCH
-router.get("/search", verifyJWT, (req, res) => {
-  if (!req.query.q) {
-    res.status(StatusCodes.BAD_REQUEST).json({ error: "No query specified" });
-    return;
-  }
-
-  const queryArray = req.query.q.split(" ");
-
-  Entries.findAndCountAll({
-    where: {
-      content_text: {
-        [Sequelize.Op.and]: queryArray.map(queryItem => ({
-          [Sequelize.Op.like]: `%${queryItem}%`
-        }))
-      }
-    }
-  })
-    .then(entries => {
-      res.send({
-        count: entries.count,
-        records: entries.rows
-      });
-    })
-    .catch(error => logger.error(error));
-});
-
-// COUNT ALL
-router.get("/count", (req, res) => {
-  Entries.count()
-    .then(count => res.json({ all_records: count }))
-    .catch(error => logger.error(error));
-});
+router.use(count);
+router.use(search);
 
 router.get("/range/:count?", verifyJWT, (req, res) => {
   const { count } = req.params;
   const { start, end, column } = req.query;
-  const startDate = moment(start, "YYYY-MM-DD", true);
-  const endDate = moment(end, "YYYY-MM-DD", true);
+  const startDate = dayjs(start, "YYYY-MM-DD", true);
+  const endDate = dayjs(end, "YYYY-MM-DD", true);
 
   if (count && count !== "count") {
     res.status(StatusCodes.BAD_REQUEST).json({
@@ -123,7 +93,7 @@ router.get("/", verifyJWT, (req, res) => {
         entry_id: req.query.id
       }
     })
-      .then(entry => res.json(entry))
+      .then(entry => res.json(entry || {}))
       .catch(error => logger.error(error));
   } else {
     Entries.findAndCountAll()
@@ -137,7 +107,7 @@ router.get("/", verifyJWT, (req, res) => {
 
 // ALL ENTRIES FOR GIVEN YEAR
 router.get("/:year", verifyJWT, (req, res) => {
-  const parsedDate = moment(req.params.year, "YYYY", true);
+  const parsedDate = dayjs(req.params.year, "YYYY", true);
 
   if (!parsedDate.isValid()) {
     res.status(StatusCodes.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY" });
@@ -170,7 +140,7 @@ router.get("/:year", verifyJWT, (req, res) => {
 // ALL ENTRIES FOR GIVEN YEAR:MONTH PAIR
 router.get("/:year/:month", verifyJWT, (req, res) => {
   const { year, month } = req.params;
-  const parsedDate = moment(`${year}-${month}`, "YYYY-MM", true);
+  const parsedDate = dayjs(`${year}-${month}`, "YYYY-MM", true);
 
   if (!parsedDate.isValid()) {
     res.status(StatusCodes.BAD_REQUEST).json({ error: parsedDate.toString(), required_format: "YYYY-MM" });
@@ -203,7 +173,7 @@ router.get("/:year/:month", verifyJWT, (req, res) => {
 // GET SINGLE ENTRY (matching year/month/day)
 router.get("/:year/:month/:day", async (req, res) => {
   const { year, month, day } = req.params;
-  const parsedDate = moment(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
+  const parsedDate = dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true);
 
   if (!parsedDate.isValid()) {
     res.status(StatusCodes.BAD_REQUEST).json({
@@ -230,7 +200,7 @@ router.get("/:year/:month/:day", async (req, res) => {
 });
 
 /**
- * =============== [ POST - REQUESTS ] ===============
+ * ============================== POST ==============================
  */
 
 // CREATE SINGLE ENTRY
@@ -260,7 +230,7 @@ router.post("/", verifyJWT, (req, res) => {
   }
 
   // strictly check if date matches the required format
-  const assignedDay = moment(REQUEST_BODY_JSON.assigned_day, "YYYY-MM-DD", true);
+  const assignedDay = dayjs(REQUEST_BODY_JSON.assigned_day, "YYYY-MM-DD", true);
   if (!assignedDay.isValid()) {
     res.status(StatusCodes.BAD_REQUEST).json({ error: assignedDay.toString(), required_format: "YYYY-MM-DD" });
     return;
@@ -277,7 +247,7 @@ router.post("/", verifyJWT, (req, res) => {
     .then(existingEntry => {
       if (existingEntry) {
         res.status(StatusCodes.CONFLICT).json({
-          error: `Entry for ${moment(assignedDay).format("YYYY-MM-DD")} already exists!`
+          error: `Entry for ${dayjs(assignedDay).format("YYYY-MM-DD")} already exists!`
         });
         return;
       }
@@ -296,7 +266,7 @@ router.post("/", verifyJWT, (req, res) => {
 });
 
 /**
- * =============== [ PUT - REQUESTS ] ===============
+ * ============================== PUT ==============================
  */
 
 // UPDATE SINGLE ENTRY
@@ -353,7 +323,7 @@ router.put("/", verifyJWT, (req, res) => {
 });
 
 /**
- * =============== [ DELETE - REQUESTS ] ===============
+ * ============================== DELETE ==============================
  */
 
 // DELETE SINGLE ENTRY
