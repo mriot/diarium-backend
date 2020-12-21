@@ -1,5 +1,5 @@
 const express = require("express");
-const moment = require("moment");
+const dayjs = require("dayjs");
 const Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 const HttpStatus = require("http-status-codes");
@@ -14,7 +14,7 @@ router.post("/", (req, res) => {
   const { error, value } = schema.validate(req.body);
 
   if (error) {
-    res.status(HttpStatus.BAD_REQUEST).json({ error });
+    res.status(HttpStatus.StatusCodes.BAD_REQUEST).json({ error });
     return;
   }
 
@@ -24,8 +24,8 @@ router.post("/", (req, res) => {
       _isValid: err ? `false (${err.message})` : true,
       decodedJWT,
       human_readable: {
-        issued_at: moment.unix(decodedJWT.iat).format("YYYY-MM-DD HH:mm:ss Z"),
-        expires_at: moment.unix(decodedJWT.exp).format("YYYY-MM-DD HH:mm:ss Z")
+        issued_at: dayjs.unix(decodedJWT.iat).format("YYYY-MM-DD HH:mm:ss Z"),
+        expires_at: dayjs.unix(decodedJWT.exp).format("YYYY-MM-DD HH:mm:ss Z")
       }
     });
   });
