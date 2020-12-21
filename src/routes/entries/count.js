@@ -7,7 +7,7 @@ const logger = require("node-color-log");
 
 const router = express.Router();
 
-router.get("/dount/:year?/:month?", verifyJWT, async (req, res) => {
+router.get("/count/:year?/:month?", verifyJWT, async (req, res) => {
   const { year, month } = req.params;
   const response = {};
 
@@ -56,13 +56,6 @@ router.get("/dount/:year?/:month?", verifyJWT, async (req, res) => {
   }
 
   res.json(response);
-});
-
-// COUNT ALL
-router.get("/count", (req, res) => {
-  Entries.count()
-    .then(count => res.json({ all_records: count }))
-    .catch(error => logger.error(error));
 });
 
 module.exports = router;
