@@ -5,6 +5,7 @@ const logger = require("node-color-log");
 const chalk = require("chalk");
 const db = require("./config/database");
 const { StatusCodes } = require("http-status-codes");
+const fileUpload = require("express-fileupload");
 const morgan = require("./config/morgan");
 
 const port = process.env.PORT || 5000;
@@ -23,7 +24,8 @@ app.use(cors());
 app.use(express.json({ limit: "300kb" })); // http://expressjs.com/en/4x/api.html#express.json
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+app.use(fileUpload());
+
 app.use("/api/user", require("./routes/user"));
 app.use("/api/entries", require("./routes/entries"));
 app.use("/api/jwt", require("./routes/jwt-info"));
