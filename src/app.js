@@ -29,7 +29,6 @@ app.use(fileUpload());
 app.use("/api/user", require("./routes/user"));
 app.use("/api/entries", require("./routes/entries"));
 app.use("/api/jwt", require("./routes/jwt-info"));
-app.use("/api/upload", require("./routes/upload"));
 app.use((req, res, next) => {
   console.log(chalk.bgRed(StatusCodes.NOT_FOUND));
   res.status(StatusCodes.NOT_FOUND).json({ error: `Could not find endpoint ${req.url}` });
