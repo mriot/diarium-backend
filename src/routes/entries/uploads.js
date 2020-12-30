@@ -69,11 +69,10 @@ router.post("/uploads/:year?/:month?/:day?", function (req, res) {
   const parsedDate = dayjs(`${year}/${month}/${day}`, "YYYY/MM/DD", true);
 
   if (!parsedDate.isValid()) {
-    res.status(StatusCodes.BAD_REQUEST).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
       error: parsedDate.toString(),
       required_format: "YYYY/MM/DD"
     });
-    return;
   }
 
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -85,21 +84,31 @@ router.post("/uploads/:year?/:month?/:day?", function (req, res) {
   }
 
   const file = req.files.file;
+  const filepath = path.join(ROOT, parsedDate.format("YYYY-MM-DD"));
 
-  const filepath = path.join(ROOT, parsedDate.format("YYYY-MM-DD"), file.name.replace(/\s/, "_"));
-
-  file.mv(filepath, (err) => {
+  fs.mkdir(filepath, { recursive: true }, (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         code: StatusCodes.INTERNAL_SERVER_ERROR,
         error: "Internal Server Error",
-        message: "Failed uploading the file",
+        message: "Could not save file to disk",
         err
       });
     }
 
-    res.json({
-      path: path.join(req.baseUrl, req.path, file.name.replace(/\s/, "_"))
+    file.mv(path.join(filepath, file.name.replace(/\s/, "_")), (err) => {
+      if (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          code: StatusCodes.INTERNAL_SERVER_ERROR,
+          error: "Internal Server Error",
+          message: "Failed uploading the file",
+          err
+        });
+      }
+
+      res.json({
+        path: path.join(req.baseUrl, req.path, file.name.replace(/\s/gi, "_"))
+      });
     });
   });
 });
