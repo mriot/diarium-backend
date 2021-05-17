@@ -96,7 +96,7 @@ router.post("/uploads/:year?/:month?/:day?", function (req, res) {
       });
     }
 
-    file.mv(path.join(filepath, file.name.replace(/\s/, "_")), (err) => {
+    file.mv(path.join(filepath, file.name.replace(/\s/gi, "_")), (err) => {
       if (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           code: StatusCodes.INTERNAL_SERVER_ERROR,
