@@ -2066,10 +2066,10 @@ node-addon-api@^3.0.0:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.1.0.tgz#98b21931557466c6729e51cb77cd39c965f42239"
   integrity sha512-flmrDNB06LIl5lywUz7YlNGZH/5p0M7W28k8hzd9Lshtdh1wshD2Y+U4h9LD6KObOy1f+fEVdgprPrEymjM5uw==
 
-node-color-log@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/node-color-log/-/node-color-log-5.2.0.tgz#fb5cc17a485d08ed590ae8a01265e0d13035c8ae"
-  integrity sha512-hQ6TG6WQJVAheRTeIUUxcxVFCv+guVcK+eNAla/4+lLr0u5axBXrSaUAnRwWoBQBswLtwlYYYgDX9J6ieyvl1w==
+node-color-log@5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/node-color-log/-/node-color-log-5.3.1.tgz#26156a8c02f9235f26a1e1d5d28c444e38b7f606"
+  integrity sha512-dO3OtV4F8dB3Ytxfg6H8qN1RqJ+KJRfIYjsfYLScm+pZ93vzDb2l5mVqRU8GDjTZCXTWeA3n8cV8aIHiV5htlQ==
 
 node-gyp@3.x:
   version "3.8.0"
