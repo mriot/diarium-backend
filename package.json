@@ -17,7 +17,7 @@
     "jsdom": "16.4.0",
     "jsonwebtoken": "8.5.1",
     "node-color-log": "5.2.0",
-    "sequelize": "6.3.5",
+    "sequelize": "6.7.0",
     "slate": "0.59.0",
     "sqlite3": "5.0.0"
   },
