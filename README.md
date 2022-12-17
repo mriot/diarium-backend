@@ -1,4 +1,40 @@
-# DIARIUM API Docs
+# DIARIUM backend API docs
+
+Le Frontend: <https://github.com/mriot/diarium>  
+
+---
+
+<details>
+  <summary>What I've learned during this project</summary>
+
+  ### Frontend
+
+  - Using Node as dev environment
+  - REACT and its ecosystem
+    - JSX
+    - Hooks
+    - Recoil for shared state management
+  - TinyMCE (WYSIWYG editor)
+  - Several libraries, most notably...
+    - Moment.js and Day.js
+
+  ### Backend
+
+  - Node as Webserver
+  - Express Framework
+  - Session management with JSON Web Tokens (JWT)
+  - REST core concepts
+  - Creating, planning, developing and testing API endpoints
+    - Postman
+  - Using SQLite as database
+  - Custom backup management
+
+  ### Misc
+
+  - How hard it is to find a good WYSIWYG-Editor
+</details>
+
+---
 
 ## HTTP Methods
 `GET` is used to *receive* data from the server  
